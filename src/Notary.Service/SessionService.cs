@@ -10,6 +10,7 @@ using log4net;
 using Notary.Contract;
 using Notary.Interface.Repository;
 using Notary.Interface.Service;
+using System.Linq;
 
 namespace Notary.Service
 {
@@ -78,6 +79,16 @@ namespace Notary.Service
         public async Task SignoutAsync(string accountSlug)
         {
 
+        }
+
+        public async Task<List<ApiToken>> GetSessions(string accountSlug, bool activeOnly)
+        {
+            var tokens = await Token.GetAccountTokens(accountSlug);
+
+            if (activeOnly)
+                tokens = tokens.Where(a => a.Active).ToList();
+
+            return tokens;
         }
 
         protected ILog Log { get; }

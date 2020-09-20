@@ -22,5 +22,13 @@ namespace Notary.Interface.Service
         /// <param name="accountSlug"></param>
         /// <returns></returns>
         Task SignoutAsync(string accountSlug);
+
+        /// <summary>
+        /// Get an account's active sessions
+        /// </summary>
+        /// <param name="accountSlug">The slug of the account</param>
+        /// <param name="activeOnly">Whether to return only the active sessions of the account</param>
+        /// <returns>List of sessions matching the account and parameters</returns>
+        Task<List<ApiToken>> GetSessions(string accountSlug, bool activeOnly);
     }
 }
