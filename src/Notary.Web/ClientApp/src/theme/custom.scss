@@ -1,0 +1,15 @@
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";
+
+$primary-color: #4575F0;
+$shade-ligher: #6390FF;
+$shade-darker: #1F44A3;
+
+$complementary-dark: #A3780F;
+$complementary-light: #F0BE46;
+
+$theme-colors: ("primary": $primary-color,
+    "secondary": $complementary-light,
+    "info": $shade-ligher
+    );

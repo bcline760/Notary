@@ -62,7 +62,10 @@ namespace Notary.Web
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            var config = Configuration.Get<NotaryConfiguration>();
+            var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
+            config.EncryptionKey = Configuration["EncryptionKey"];
+            config.ConnectionString = Configuration["ConnectionString"];
+
             builder.RegisterInstance(config).SingleInstance();
 
             builder.Register(r => LogManager.GetLogger(typeof(Startup))).As<ILog>().SingleInstance();

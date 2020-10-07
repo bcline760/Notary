@@ -36,14 +36,11 @@ namespace Notary.Data
             builder.Register(r =>
             {
                 var config = r.Resolve<NotaryConfiguration>();
-                var hostUrl = config.Database.Host
-                .Replace("<username>", config.Database.Credentials.Username)
-                .Replace("<password>", config.Database.Credentials.Password)
-                .Replace("<dbname>", config.Database.DatabaseName);
-                var settings = MongoClientSettings.FromUrl(MongoUrl.Create(hostUrl));
+                var connectionString = config.ConnectionString;
+                var settings = MongoClientSettings.FromUrl(MongoUrl.Create(connectionString));
 
                 IMongoClient client = new MongoClient(settings);
-                IMongoDatabase db = client.GetDatabase(config.Database.DatabaseName);
+                IMongoDatabase db = client.GetDatabase("notary");
                 return db;
             }).As<IMongoDatabase>().SingleInstance();
 

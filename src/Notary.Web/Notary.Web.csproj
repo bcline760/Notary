@@ -10,6 +10,7 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <UserSecretsId>38f0946f-bc4e-47b0-bca7-01b841fb4d8d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\model\api-response.model.ts" />
+    <None Remove="ClientApp\src\service\auth-guard.service.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Notary.Contract\Notary.Contract.csproj" />
     <ProjectReference Include="..\Notary.Interface\Notary.Interface.csproj" />
     <ProjectReference Include="..\Notary.Service\Notary.Service.csproj" />
@@ -36,8 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\model\" />
-    <Folder Include="ClientApp\src\service\" />
+    <TypeScriptCompile Include="ClientApp\src\model\api-response.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\service\auth-guard.service.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
