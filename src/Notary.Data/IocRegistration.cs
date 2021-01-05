@@ -36,7 +36,11 @@ namespace Notary.Data
             builder.Register(r =>
             {
                 var config = r.Resolve<NotaryConfiguration>();
-                var connectionString = config.ConnectionString;
+                var connectionString = config.ConnectionString
+                    .Replace("<username>", config.DirectorySettings.ServiceAccountUser)
+                    .Replace("<password>", config.DirectorySettings.ServiceAccountPassword)
+                    .Replace("<dbname>", "notary");
+
                 var settings = MongoClientSettings.FromUrl(MongoUrl.Create(connectionString));
 
                 IMongoClient client = new MongoClient(settings);

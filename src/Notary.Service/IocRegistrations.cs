@@ -6,6 +6,7 @@ using Autofac;
 
 using Notary.IOC;
 using Notary.Interface.Service;
+using log4net;
 
 namespace Notary.Service
 {
@@ -22,9 +23,44 @@ namespace Notary.Service
             builder.RegisterType<EncryptionService>()
                 .As<IEncryptionService>()
                 .InstancePerLifetimeScope();
-            builder.RegisterType<SessionService>()
-                .As<ISessionService>()
-                .InstancePerLifetimeScope();
+
+            builder.Register(r =>
+            {
+                var config = r.Resolve<NotaryConfiguration>();
+
+                ISessionService session = null;
+                switch (config.Authentication)
+                {
+                    case AuthenticationProvider.System:
+                        session = new SystemSessionService(
+                            r.Resolve<ILog>(),
+                            r.Resolve<IAccountService>(),
+                            null,
+                            r.Resolve<IEncryptionService>(),
+                            config
+                        );
+                        break;
+                    case AuthenticationProvider.ActiveDirectory:
+                        session = new LdapSessionService(
+                            r.Resolve<ILog>(),
+                            r.Resolve<IAccountService>(),
+                            null,
+                            r.Resolve<IEncryptionService>(),
+                            config
+                        );
+                        break;
+                    case AuthenticationProvider.SAML:
+                        session = new SamlSessionService(
+                            r.Resolve<ILog>(),
+                            r.Resolve<IAccountService>(),
+                            null,
+                            r.Resolve<IEncryptionService>(),
+                            config
+                        );
+                        break;
+                }
+                return session;
+            }).As<ISessionService>().InstancePerLifetimeScope();
         }
     }
 }

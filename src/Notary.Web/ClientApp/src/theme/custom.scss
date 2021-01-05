@@ -9,7 +9,16 @@ $shade-darker: #1F44A3;
 $complementary-dark: #A3780F;
 $complementary-light: #F0BE46;
 
-$theme-colors: ("primary": $primary-color,
+$danger-color: #d14156;
+$success-color: #62d178;
+$warning-color: #d1b769;
+
+$theme-colors: (
+    "dark": $complementary-dark,
+    "primary": $primary-color,
     "secondary": $complementary-light,
-    "info": $shade-ligher
-    );
+    "info": $shade-ligher,
+    "warning": $warning-color,
+    "danger": $danger-color,
+    "success": $success-color
+);

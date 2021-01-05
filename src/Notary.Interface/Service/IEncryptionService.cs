@@ -30,15 +30,12 @@ namespace Notary.Interface.Service
         byte[] Encrypt(byte[] data, string accountSlug);
 
         /// <summary>
-        /// 
+        /// Generate a JSON Web Token based on the given claims
         /// </summary>
         /// <param name="claims"></param>
         /// <param name="tokenExpiry"></param>
-        /// <param name="signingCertificate"></param>
-        /// <param name="issuer"></param>
-        /// <param name="audience"></param>
         /// <returns></returns>
-        string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry, X509Certificate2 signingCertificate, string issuer, string audience);
+        string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry);
 
         /// <summary>
         /// 

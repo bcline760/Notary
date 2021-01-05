@@ -13,6 +13,12 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { SessionModule } from './session/session.module';
 import { HttpService } from '../service/http.service';
 import { AuthGuardService } from '../service/auth-guard.service';
+import { JwtModule } from '@auth0/angular-jwt';
+
+
+export function fnTokenGetter() {
+    return localStorage.getItem("access_token");
+}
 
 @NgModule({
     declarations: [
@@ -21,7 +27,20 @@ import { AuthGuardService } from '../service/auth-guard.service';
     imports: [
         BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
         HttpClientModule,
+        JwtModule.forRoot({
+            config: {
+                throwNoTokenError: false,
+                tokenGetter: fnTokenGetter,
+                whitelistedDomains: ['localhost'],
+            }
+        }),
         FormsModule,
+        CertificatesModule,
+        ConfigurationModule,
+        KeyManagementModule,
+        EncryptionModule,
+        BrowserAnimationsModule,
+        SessionModule,
         RouterModule.forRoot([
             {
                 path: '',
@@ -59,14 +78,8 @@ import { AuthGuardService } from '../service/auth-guard.service';
                 data: { showGateLayout: true }
             }
         ]),
-        CertificatesModule,
-        ConfigurationModule,
-        KeyManagementModule,
-        EncryptionModule,
-        BrowserAnimationsModule,
-        SessionModule
     ],
-    providers: [HttpService],
+    providers: [HttpService, AuthGuardService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

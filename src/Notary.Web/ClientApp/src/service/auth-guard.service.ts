@@ -13,6 +13,8 @@ export class AuthGuardService implements CanActivate {
             return this.router.parseUrl('session/login');
         }
 
+        const token = this.jwtService.decodeToken();
+
         return true;
     }
 }

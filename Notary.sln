@@ -10,12 +10,15 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notary.Interface", "src\Notary.Interface\Notary.Interface.csproj", "{5894BD9C-37F4-4244-BF24-5E3623644927}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{43E441C6-7E66-4CA5-8640-9108E4860DBA}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notary.Data", "src\Notary.Data\Notary.Data.csproj", "{2C19EF4B-250F-454A-B688-7398D61C0FB8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notary.Service", "src\Notary.Service\Notary.Service.csproj", "{8352E625-3962-48BB-BCAC-ADEE832CF23D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notary.Web", "src\Notary.Web\Notary.Web.csproj", "{876BC5C5-E4F5-4C03-84D2-E5B45F904286}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notary.Web", "src\Notary.Web\Notary.Web.csproj", "{876BC5C5-E4F5-4C03-84D2-E5B45F904286}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,6 +4,7 @@ import { LoginComponent } from './login/login.component';
 import { LogoutComponent } from './logout/logout.component';
 import { RouterModule } from '@angular/router';
 import { SessionComponent } from './session.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -11,21 +12,15 @@ import { SessionComponent } from './session.component';
     declarations: [LoginComponent, LogoutComponent, SessionComponent],
     imports: [
         CommonModule,
+        FormsModule,
         RouterModule.forChild([
             {
-                path: '',
-                pathMatch: 'full',
-                children: [
-                    {
-                        path: "login",
-                        component: LoginComponent
-                    },
-                    {
-                        path: "logout",
-                        component: LogoutComponent
-                    }
-                ],
-                component: SessionComponent
+                path: "login",
+                component: LoginComponent
+            },
+            {
+                path: "logout",
+                component: LogoutComponent
             }
         ])
     ],

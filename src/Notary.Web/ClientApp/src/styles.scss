@@ -5,3 +5,23 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+a:link {
+    color: $shade-darker;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:visited {
+    color: $complementary-light;
+}
+
+.form-control {
+    border: 1px solid $shade-darker;
+}
+
+.window {
+    border: 2px ridge $complementary-dark;
+    border-radius: 0.5rem;
+    box-shadow: 5px 8px 10px grey;
+}

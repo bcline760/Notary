@@ -146,10 +146,10 @@ namespace Notary.Service
         public byte[] GeneratePasswordHash(string plainText)
         {
             byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(Constants.PASSWORD_HASH_SALT);
-            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, Constants.PASSWORD_HASH_ITERATIONS))
+            byte[] salt = Encoding.UTF8.GetBytes(Constants.PasswordHashSalt);
+            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, Constants.PasswordHashIterations))
             {
-                hashedPwd = rfc.GetBytes(Constants.PASSWORD_HASH_LENGTH);
+                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
             }
             return hashedPwd;
         }
@@ -169,9 +169,10 @@ namespace Notary.Service
             }
         }
 
-        public string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry, X509Certificate2 signingCertificate, string issuer, string audience)
+        public string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry)
         {
-            SigningCredentials signingCredentials = new X509SigningCredentials(signingCertificate);
+            var certificate = (X509Certificate2)X509Certificate.CreateFromCertFile(_config.TokenSettings.SigningCertificatePath);
+            SigningCredentials signingCredentials = new X509SigningCredentials(certificate);
             var jwtHandler = new JwtSecurityTokenHandler();
             var tokenDesc = new SecurityTokenDescriptor
             {
@@ -179,8 +180,8 @@ namespace Notary.Service
                 Subject = claims,
                 NotBefore = DateTime.Now,
                 Expires = tokenExpiry,
-                Issuer = issuer,
-                Audience = audience
+                Issuer = _config.TokenSettings.Issuer,
+                Audience = _config.TokenSettings.Audience
             };
 
             var t = jwtHandler.CreateToken(tokenDesc);
@@ -231,11 +232,26 @@ namespace Notary.Service
 
                 return claims;
             }
-            catch (SecurityTokenInvalidAudienceException invalidAudience) { } //Leaving these for future logging
-            catch (SecurityTokenInvalidIssuerException invalidIssuer) { }
-            catch (SecurityTokenInvalidSignatureException invalidSignature) { }
-            catch (SecurityTokenReplayDetectedException replayDetected) { }
-            catch (SecurityTokenExpiredException expiredToken) { }
+            catch (SecurityTokenInvalidAudienceException invalidAudience)
+            {
+                _log.Error(invalidAudience.Message);
+            }
+            catch (SecurityTokenInvalidIssuerException invalidIssuer)
+            {
+                _log.Error(invalidIssuer.Message);
+            }
+            catch (SecurityTokenInvalidSignatureException invalidSignature)
+            {
+                _log.Error(invalidSignature.Message);
+            }
+            catch (SecurityTokenReplayDetectedException replayDetected)
+            {
+                _log.Error(replayDetected.Message);
+            }
+            catch (SecurityTokenExpiredException expiredToken)
+            {
+                _log.Error(expiredToken.Message);
+            }
 
             return null;
         }
@@ -243,10 +259,10 @@ namespace Notary.Service
         public bool VerifyPasswordHash(byte[] passwordHash)
         {
             byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(Constants.PASSWORD_HASH_SALT);
-            using (var rfc = new Rfc2898DeriveBytes(passwordHash, salt, Constants.PASSWORD_HASH_ITERATIONS))
+            byte[] salt = Encoding.UTF8.GetBytes(Constants.PasswordHashSalt);
+            using (var rfc = new Rfc2898DeriveBytes(passwordHash, salt, Constants.PasswordHashIterations))
             {
-                hashedPwd = rfc.GetBytes(Constants.PASSWORD_HASH_LENGTH);
+                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
             }
 
             return hashedPwd.AreBytesEqual(passwordHash);

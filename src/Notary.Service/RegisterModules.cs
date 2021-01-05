@@ -4,8 +4,6 @@ using System.Text;
 
 using Autofac;
 
-
-
 namespace Notary.Service
 {
     public static class RegisterModules
