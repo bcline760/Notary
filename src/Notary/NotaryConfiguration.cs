@@ -22,6 +22,11 @@ namespace Notary
         public string EncryptionKey { get; set; }
 
         /// <summary>
+        /// Get or set the hashing properties for PBKDF
+        /// </summary>
+        public Hashing Hashing { get; set; }
+
+        /// <summary>
         /// Get or set the intermediate file system structure
         /// </summary>
         public CertificatePath Intermediate { get; set; }
@@ -65,6 +70,24 @@ namespace Notary
         public string ServiceAccountPassword { get; set; }
 
         public string ServiceAccountUser { get; set; }
+    }
+
+    public class Hashing
+    {
+        /// <summary>
+        /// Get or set the number of iterations used for hashing. More = secure but slower.
+        /// </summary>
+        public int Iterations { get; set; }
+
+        /// <summary>
+        /// Get or set the length of the hash
+        /// </summary>
+        public int Length { get; set; }
+
+        /// <summary>
+        /// Get or set the salt used for hashing
+        /// </summary>
+        public string Salt { get; set; }
     }
 
     public class TokenSettings

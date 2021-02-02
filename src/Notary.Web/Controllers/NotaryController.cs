@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using log4net;
 using Microsoft.AspNetCore.Authorization;
@@ -26,124 +27,27 @@ namespace Notary.Web.Controllers
         /// </summary>
         /// <typeparam name="TOut">The service method return type</typeparam>
         /// <param name="serviceMethod">A delegate for the service method to be executed</param>
-        /// <param name="svcFunction">The name of the service function being performed</param>
-        /// <param name="code">The HTTP status code to return on success</param>
+        /// <param name="successCode">The HTTP status code used to return on success</param>
+        /// <param name="failCode">The HTTP status code used to return on failure</param>
         /// <returns>An HTTP action result with message and status code</returns>
-        protected async Task<IActionResult> ExecuteServiceMethod<TOut>(Func<Task<TOut>> serviceMethod, string svcFunction, DesiredStatusCode code)
+        protected async Task<IActionResult> ExecuteServiceMethod<TOut>(
+            Func<Task<TOut>> serviceMethod,
+            HttpStatusCode successCode,
+            HttpStatusCode failCode
+        ) where TOut : class
         {
             IActionResult result = null;
-
-            ApiResponse<TOut> apiResponse = new ApiResponse<TOut>
-            {
-                Success = false
-            };
 
             try
             {
                 var response = await serviceMethod();
-                apiResponse.Data = response;
 
-                switch (code)
-                {
-                    case DesiredStatusCode.OK:
-                        apiResponse.Success = true;
-                        result = Ok(apiResponse);
-                        break;
-                    case DesiredStatusCode.Created:
-                        apiResponse.Success = true;
-                        result = CreatedAtAction(svcFunction, apiResponse);
-                        break;
-                }
+                result = response == null ? GetHttpResponseCode(failCode, response) : GetHttpResponseCode(successCode, response);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = $"Failed to execute service operation {svcFunction}.";
                 ex.IfNotLoggedThenLog(Log);
-                result = BadRequest(apiResponse);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Execute a service method.
-        /// </summary>
-        /// <typeparam name="TIn">Service method input parameter type</typeparam>
-        /// <typeparam name="TOut">The service method return type</typeparam>
-        /// <param name="serviceMethod">A delegate for the service method to be executed</param>
-        /// <param name="svcParam">The input parameter for the service method</param>
-        /// <param name="svcFunction">The name of the service function being performed</param>
-        /// <param name="code">The HTTP status code to return on success</param>
-        /// <returns>An HTTP action result with message and status code</returns>
-        protected async Task<IActionResult> ExecuteServiceMethod<TIn, TOut>(Func<TIn, Task<TOut>> serviceMethod, TIn svcParam, string svcFunction, DesiredStatusCode code)
-        {
-            IActionResult result = null;
-
-            ApiResponse<TOut> apiResponse = new ApiResponse<TOut>
-            {
-                Success = false
-            };
-
-            try
-            {
-                var response = await serviceMethod(svcParam);
-                apiResponse.Data = response;
-
-                switch (code)
-                {
-                    case DesiredStatusCode.OK:
-                        apiResponse.Success = true;
-                        result = Ok(apiResponse);
-                        break;
-                    case DesiredStatusCode.Created:
-                        apiResponse.Success = true;
-                        result = CreatedAtAction(svcFunction, apiResponse);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                apiResponse.Success = false;
-                apiResponse.Message = $"Failed to execute service operation {svcFunction}.";
-                ex.IfNotLoggedThenLog(Log);
-                result = BadRequest(apiResponse);
-            }
-
-            return result;
-        }
-
-        protected async Task<IActionResult> ExecuteServiceMethod<TIn>(Func<TIn,Task> serviceMethod, TIn svcParam, string svcFunction, DesiredStatusCode code)
-        {
-            IActionResult result = null;
-
-            ApiResponse<string> apiResponse = new ApiResponse<string>
-            {
-                Success = false
-            };
-
-            try
-            {
-                await serviceMethod(svcParam);
-
-                switch (code)
-                {
-                    case DesiredStatusCode.OK:
-                        apiResponse.Success = true;
-                        result = Ok(apiResponse);
-                        break;
-                    case DesiredStatusCode.Created:
-                        apiResponse.Success = true;
-                        result = CreatedAtAction(svcFunction, apiResponse);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                apiResponse.Success = false;
-                apiResponse.Message = $"Failed to execute service operation {svcFunction}.";
-                ex.IfNotLoggedThenLog(Log);
-                result = BadRequest(apiResponse);
+                result = StatusCode((int)HttpStatusCode.InternalServerError);
             }
 
             return result;
@@ -152,55 +56,133 @@ namespace Notary.Web.Controllers
         /// <summary>
         /// Execute a service method
         /// </summary>
-        /// <typeparam name="TIn">First service method input parameter type</typeparam>
-        /// <typeparam name="TIn2">Second service method input parameter type</typeparam>
-        /// <typeparam name="TOut"></typeparam>
+        /// <typeparam name="TIn"></typeparam>
+        /// <typeparam name="TOut">The service method return type</typeparam>
         /// <param name="serviceMethod">A delegate for the service method to be executed</param>
-        /// <param name="svcParam">The input parameter for the service method</param>
-        /// <param name="svcParam2">The second input parameter for the service method</param>
-        /// <param name="svcFunction">The name of the service function being performed</param>
-        /// <param name="code">The HTTP status code to return on success</param>
+        /// <param name="svcParam">The parameter to be passed into the service</param>
+        /// <param name="successCode"></param>
+        /// <param name="failCode"></param>
+        /// <returns>An HTTP action result with message and status code</returns>
+        protected async Task<IActionResult> ExecuteServiceMethod<TIn, TOut>(
+            Func<TIn, Task<TOut>> serviceMethod,
+            TIn svcParam,
+            HttpStatusCode successCode,
+            HttpStatusCode failCode) where TOut: class
+        {
+            IActionResult result = null;
+
+            try
+            {
+                var response = await serviceMethod(svcParam);
+
+                result = response == null ? GetHttpResponseCode(failCode, response) : GetHttpResponseCode(successCode, response);
+            }
+            catch (Exception ex)
+            {
+                ex.IfNotLoggedThenLog(Log);
+                result = StatusCode((int)HttpStatusCode.InternalServerError);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Execute a service method
+        /// </summary>
+        /// <typeparam name="TIn"></typeparam>
+        /// <param name="serviceMethod">A delegate for the service method to be executed</param>
+        /// <param name="successCode"></param>
+        /// <returns>An HTTP action result with message and status code</returns>
+        protected async Task<IActionResult> ExecuteServiceMethod<TIn>(
+            Func<TIn, Task> serviceMethod,
+            TIn svcParam,
+            HttpStatusCode successCode)
+        {
+            IActionResult result = null;
+
+            try
+            {
+                await serviceMethod(svcParam);
+
+                return GetHttpResponseCode<object>(successCode, null);
+            }
+            catch (Exception ex)
+            {
+                ex.IfNotLoggedThenLog(Log);
+                result = StatusCode((int)HttpStatusCode.InternalServerError);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Execute a service method
+        /// </summary>
+        /// <typeparam name="TIn">The type used by the first service method parameter</typeparam>
+        /// <typeparam name="TIn2">The type used by the second service method parameter</typeparam>
+        /// <typeparam name="TOut">The service method return type</typeparam>
+        /// <param name="serviceMethod">A delegate for the service method to be executed</param>
+        /// <param name="svcParam">The first service method parameter</param>
+        /// <param name="svcParam2">The second service method parameter</param>
+        /// <param name="successCode">The HTTP status code used to return on success</param>
+        /// <param name="failCode">The HTTP status code used to return on failure</param>
         /// <returns>An HTTP action result with message and status code</returns>
         protected async Task<IActionResult> ExecuteServiceMethod<TIn, TIn2, TOut>(
             Func<TIn, TIn2, Task<TOut>> serviceMethod,
             TIn svcParam,
             TIn2 svcParam2,
-            string svcFunction,
-            DesiredStatusCode code)
+            HttpStatusCode successCode,
+            HttpStatusCode failCode) where TOut : class
         {
             IActionResult result = null;
-
-            ApiResponse<TOut> apiResponse = new ApiResponse<TOut>
-            {
-                Success = false
-            };
 
             try
             {
                 var response = await serviceMethod(svcParam, svcParam2);
-                apiResponse.Data = response;
-
-                switch (code)
-                {
-                    case DesiredStatusCode.OK:
-                        apiResponse.Success = true;
-                        result = Ok(apiResponse);
-                        break;
-                    case DesiredStatusCode.Created:
-                        apiResponse.Success = true;
-                        result = CreatedAtAction(svcFunction, apiResponse);
-                        break;
-                }
+                result = response == null ? GetHttpResponseCode(failCode, response) : GetHttpResponseCode(successCode, response);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = $"Failed to execute service operation {svcFunction}.";
                 ex.IfNotLoggedThenLog(Log);
-                result = BadRequest(apiResponse);
+                result = StatusCode((int)HttpStatusCode.InternalServerError);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get an action result based on desired HTTP status code
+        /// </summary>
+        /// <typeparam name="TOut"></typeparam>
+        /// <param name="code">The kind of HTTP status code</param>
+        /// <param name="returnObject">The object to return if any. Set to object default if not desired</param>
+        /// <param name="context">Additional context such as a URL</param>
+        /// <returns>An HTTP action result with message and status code</returns>
+        private IActionResult GetHttpResponseCode<TOut>(HttpStatusCode code, TOut returnObject) where TOut : class
+        {
+            switch (code)
+            {
+                case HttpStatusCode.OK:
+                    return Ok(returnObject);
+                case HttpStatusCode.Created:
+                    return CreatedAtAction(Request.Path, returnObject);
+                case HttpStatusCode.Accepted:
+                    return Accepted(returnObject);
+                case HttpStatusCode.NoContent:
+                    return NoContent();
+                case HttpStatusCode.BadRequest:
+                    return BadRequest();
+                case HttpStatusCode.Unauthorized:
+                    return Unauthorized();
+                case HttpStatusCode.Forbidden:
+                    return Forbid();
+                case HttpStatusCode.NotFound:
+                    return NotFound();
+                case HttpStatusCode.Conflict:
+                    return Conflict(returnObject);
+                default:
+                    return StatusCode((int)code);
+            }
         }
     }
 }

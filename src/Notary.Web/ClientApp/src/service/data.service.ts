@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { throwError } from 'rxjs';
-import { ApiResponse } from '../model/api-response.model';
+import { throwError, Observable } from 'rxjs';
 import { Data } from '../model/data.model';
 
 /**
@@ -14,72 +13,45 @@ export abstract class DataService<T extends Data> {
 
     constructor(protected httpSvc: HttpService, protected controller: string) { }
 
-    protected async createAsync(model: T): Promise<ApiResponse<string>> {
+    protected createAsync(model: T): Observable<string> {
         if (model === null)
             throwError('Please supply a model to create');
 
-        let response: ApiResponse<string> = new ApiResponse<string>();
+        const response: Observable<string> = this.httpSvc.postAsync<string, T>(this.controller, model);
 
-        try {
-            response = await this.httpSvc.postAsync<ApiResponse<string>, T>(this.controller, model);
-        } catch (e) {
-            response.success = false;
-            this.handleError(e);
-        }
-
-        return response;
+        return response
     }
 
-    protected async getAsync(slug: string): Promise<ApiResponse<T>> {
+    protected getAsync(slug: string): Observable<T> {
         const url: string = `${this.controller}/slug`;
 
-        const response: ApiResponse<T> = await this.httpSvc.getAsync(url);
+        const response: Observable<T> = this.httpSvc.getAsync(url);
 
         return response;
     }
 
-    protected async getAllAsync(): Promise<ApiResponse<T[]>> {
-        const response: ApiResponse<T[]> = await this.httpSvc.getAsync(this.controller);
+    protected getAllAsync(): Observable<T[]> {
+        const response: Observable<T[]> = this.httpSvc.getAsync(this.controller);
 
         return response;
     }
 
-    protected async updateAsync(model: T): Promise<ApiResponse<string>> {
+    protected updateAsync(model: T): Observable<string> {
+        if (model === null)
+            throwError('Please supply a model to update');
+
         const url: string = `${this.controller}/${model.slug}`;
 
-        let response: ApiResponse<string> = new ApiResponse<string>();
-        response.success = false;
+        const response: Observable<string> = this.httpSvc.putAsync(url, model);
 
-        try {
-            response = await this.httpSvc.putAsync(url, model);
-        } catch (e) {
-            this.handleError(e);
-        }
-
-        return response
+        return response;
     }
 
-    protected async deleteAsync(slug: T): Promise<ApiResponse<string>> {
+    protected deleteAsync(slug: string): Observable<string> {
         const url: string = `${this.controller}/${slug}`;
 
-        let response: ApiResponse<string> = new ApiResponse<string>();
-        response.success = false;
-
-        try {
-            response = await this.httpSvc.deleteAsync(url);
-        } catch (e) {
-            this.handleError(e);
-        }
+        const response: Observable<string> = this.httpSvc.deleteAsync(slug);
 
         return response
-    }
-
-    protected handleError(error: HttpErrorResponse): void {
-        if (error.error instanceof ErrorEvent) {
-            console.error('An error has occured:', error.message);
-            throwError('An error has occured within the application');
-        } else {
-            console.error('API server returned', error.status);
-        }
     }
 }

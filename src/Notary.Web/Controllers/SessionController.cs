@@ -1,48 +1,39 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using log4net;
-using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Mvc;
 
-using Notary.Contract;
+using log4net;
+using NC=Notary.Contract;
 using Notary.Interface.Service;
 
 namespace Notary.Web.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
     public class SessionController : NotaryController
     {
-        public ISessionService Session { get; }
-
-        public SessionController(ILog log, ISessionService service) : base(log)
+        public SessionController(ISessionService sessionSvc, IAccountService accountSvc, ILog log)
+            : base(log)
         {
-            Session = service;
+            sessionService = sessionSvc;
+            accountService = accountSvc;
         }
 
-        [AllowAnonymous, Route("signin"), HttpPost]
-        public async Task<IActionResult> SignInAsync(string username, string password, bool persist)
+        [HttpPost("signin")]
+        public async Task<IActionResult> SignInAsync(NC.ICredentials credentials)
         {
-            var credentials = new BasicCredentials(username, password, persist);
-            var token = await Session.SignInAsync(credentials);
+            if (credentials == null)
+                return BadRequest();
 
-            IActionResult result = null;
-            if (token == null)
-                result = Unauthorized();
-            else
-                result = Ok(result);
+            var token = await ExecuteServiceMethod(sessionService.SignInAsync, credentials, HttpStatusCode.OK, HttpStatusCode.Unauthorized);
 
-            return result;
+            return token;
         }
 
-        [Route("signout"), HttpGet]
-        public async Task<IActionResult> SignOutAsync(string slug)
-        {
-            var result = await ExecuteServiceMethod(Session.SignoutAsync, slug, "SignoutAsync", DesiredStatusCode.OK);
-
-            return result;
-        }
+        private readonly ISessionService sessionService;
+        private readonly IAccountService accountService;
     }
 }

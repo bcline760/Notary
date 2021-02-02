@@ -1,68 +1,82 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http'
+import { Observable, pipe, zip, range, throwError, of, timer } from 'rxjs';
+import { map, mergeMap, retryWhen } from 'rxjs/operators';
+import { TokenService } from './token.service';
 
-/**
- * Service implementation that performs basic RESTful procedures over HTTP(S)
- *
- * @usageNotes
- * ```
- * const url:string = 'session/login';
- * const response = await this.httpSvc.postAsync(url, credentials);
- * ```
- */
 @Injectable({
     providedIn: 'root'
 })
 export class HttpService {
-    constructor(protected http: HttpClient) { }
 
-    /**
-     * Post data to the server. This is "create" for REST calls
-     * @param url The URL of the API method
-     * @param body The data with which to send to the server
-     */
-    async postAsync<R, B>(url: string, body: B): Promise<R> {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json'
-            })
-        };
-        return await this.http.post<R>(url, body, httpOptions).toPromise();
+    constructor(private http: HttpClient, private tokenSvc: TokenService) {
+        this.isCrossOrigin = false;
     }
 
     /**
-     * Get data from the server by HTTP GET method
-     * @param url The API method with which to retrieve data
+     * Get or set this to inform that this is a cross-origin request and set the header
      */
-    async getAsync<R>(url: string): Promise<R> {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json'
-            })
-        };
-        return await this.http.get<R>(url, httpOptions).toPromise();
+    public isCrossOrigin: boolean;
+
+    /**
+     * Get data from the REST API
+     * @param url The absolute URL to the REST API
+     */
+    getAsync<R>(url: string): Observable<R> {
+        return this._executeHttpMethod(url, "GET");
     }
 
     /**
-     * Put date to the server. This is usually used for "updating" data
-     * @param url The URL of the API method
-     * @param body The data contents
+     * Send a HTTP PUT to the REST API. This is typically updating data.
+     * @param url The absolute URL to the REST API
+     * @param body The request body to send
      */
-    async putAsync<R, B>(url: string, body: B): Promise<R> {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json'
-            })
-        };
-
-        return await this.http.put<R>(url, body, httpOptions).toPromise();
+    putAsync<R, B>(url: string, body: B): Observable<R> {
+        return this._executeHttpMethod(url, "PUT", body);
     }
 
     /**
-     * Delete data from the server.
-     * @param url The API delete method URL
+     * Send a HTTP POST to the REST API. This is typically for creating data
+     * @param url The absolute URL to the REST API
+     * @param body The request body to send
      */
-    async deleteAsync<R>(url: string): Promise<R> {
-        return await this.http.delete<R>(url).toPromise();
+    postAsync<R, B>(url: string, body: B): Observable<R> {
+        return this._executeHttpMethod(url, "POST", body);
+    }
+
+    /**
+     * Execute a HTTP DELETE on the REST API
+     * @param url The absolute URL to the REST API
+     */
+    deleteAsync<R>(url: string): Observable<R> {
+        return this._executeHttpMethod(url, "DELETE");
+    }
+
+    private _executeHttpMethod<R, B>(url: string, method: "GET" | "PUT" | "POST" | "DELETE", body?: B): Observable<R> {
+        let httpHeaders: HttpHeaders = new HttpHeaders();
+        httpHeaders = httpHeaders.append('Content-Type', 'application/json');
+
+        const token: string | null = this.tokenSvc.getToken();
+        if (token) {
+            httpHeaders = httpHeaders.append('Authorization', `Bearer ${token}`);
+        }
+
+        let data: Observable<R> = new Observable<R>();
+        switch (method) {
+            case "GET":
+                data = this.http.get<R>(url, { headers: httpHeaders });
+                break;
+            case "PUT":
+                data = this.http.put<R>(url, body, { headers: httpHeaders });
+                break;
+            case "POST":
+                data = this.http.post<R>(url, body, { headers: httpHeaders });
+                break;
+            case "DELETE":
+                data = this.http.delete<R>(url, { headers: httpHeaders });
+                break;
+        }
+
+        return data;
     }
 }

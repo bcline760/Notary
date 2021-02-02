@@ -40,24 +40,6 @@ namespace Notary.Service
                             config
                         );
                         break;
-                    case AuthenticationProvider.ActiveDirectory:
-                        session = new LdapSessionService(
-                            r.Resolve<ILog>(),
-                            r.Resolve<IAccountService>(),
-                            null,
-                            r.Resolve<IEncryptionService>(),
-                            config
-                        );
-                        break;
-                    case AuthenticationProvider.SAML:
-                        session = new SamlSessionService(
-                            r.Resolve<ILog>(),
-                            r.Resolve<IAccountService>(),
-                            null,
-                            r.Resolve<IEncryptionService>(),
-                            config
-                        );
-                        break;
                 }
                 return session;
             }).As<ISessionService>().InstancePerLifetimeScope();

@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -11,9 +11,12 @@ import { ConfigurationModule } from './configuration/configuration.module';
 import { KeyManagementModule } from './key-management/key-management.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { SessionModule } from './session/session.module';
-import { HttpService } from '../service/http.service';
-import { AuthGuardService } from '../service/auth-guard.service';
 import { JwtModule } from '@auth0/angular-jwt';
+
+import { AuthGuardService } from '../service/auth-guard.service';
+import { SessionService } from '../service/session.service';
+import { CertificateService } from '../service/certificate.service';
+import { TokenService } from '../service/token.service';
 
 
 export function fnTokenGetter() {
@@ -79,7 +82,7 @@ export function fnTokenGetter() {
             }
         ]),
     ],
-    providers: [HttpService, AuthGuardService],
+    providers: [HttpClient, SessionService, CertificateService, AuthGuardService, TokenService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -146,10 +146,10 @@ namespace Notary.Service
         public byte[] GeneratePasswordHash(string plainText)
         {
             byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(Constants.PasswordHashSalt);
-            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, Constants.PasswordHashIterations))
+            byte[] salt = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
+            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, _config.Hashing.Iterations))
             {
-                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
+                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
             }
             return hashedPwd;
         }
@@ -259,10 +259,10 @@ namespace Notary.Service
         public bool VerifyPasswordHash(byte[] passwordHash)
         {
             byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(Constants.PasswordHashSalt);
-            using (var rfc = new Rfc2898DeriveBytes(passwordHash, salt, Constants.PasswordHashIterations))
+            byte[] saltBytes = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
+            using (var rfc = new Rfc2898DeriveBytes(passwordHash, saltBytes, _config.Hashing.Iterations))
             {
-                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
+                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
             }
 
             return hashedPwd.AreBytesEqual(passwordHash);

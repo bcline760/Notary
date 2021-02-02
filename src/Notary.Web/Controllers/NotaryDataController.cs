@@ -27,7 +27,7 @@ namespace Notary.Web.Controllers
         [HttpGet, Route("")]
         public virtual async Task<IActionResult> GetAllAsync()
         {
-            var result = await ExecuteServiceMethod(Service.GetAllAsync, "GetAllAsync", DesiredStatusCode.OK);
+            var result = await ExecuteServiceMethod(Service.GetAllAsync, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
             return result;
         }
@@ -35,7 +35,7 @@ namespace Notary.Web.Controllers
         [HttpGet, Route("{slug}")]
         public virtual async Task<IActionResult> GetAsync(string slug)
         {
-            var result = await ExecuteServiceMethod(Service.GetAsync, slug, "GetAsync", DesiredStatusCode.OK);
+            var result = await ExecuteServiceMethod(Service.GetAsync, slug, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
             return result;
         }

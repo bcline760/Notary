@@ -26,6 +26,7 @@
     "@auth0/angular-jwt": "^4.2.0",
     "@azure/msal-angular": "^1.1.1",
     "@nguniversal/module-map-ngfactory-loader": "8.1.1",
+    "angular-jwt": "^0.1.11",
     "aspnet-prerendering": "^3.0.1",
     "bootstrap": "^4.3.1",
     "core-js": "^3.3.3",

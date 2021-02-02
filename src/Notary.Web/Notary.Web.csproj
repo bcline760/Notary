@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\src\model\api-response.model.ts" />
     <None Remove="ClientApp\src\service\auth-guard.service.ts" />
   </ItemGroup>
 
@@ -43,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\model\api-response.model.ts" />
     <TypeScriptCompile Include="ClientApp\src\service\auth-guard.service.ts" />
   </ItemGroup>
 

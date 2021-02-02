@@ -41,7 +41,6 @@ namespace Notary.Service
         public async Task<ApiToken> SignInAsync(ICredentials credentials)
         {
             string dn = $"{credentials.Key}@{Configuration.DirectorySettings.Domain}";
-            ApiToken token = null;
 
             try
             {
@@ -75,14 +74,13 @@ namespace Notary.Service
 
                     await Account.RegisterAccountAsync(account);
                 }
-                token = await GenerateToken(credentials, account);
+                ApiToken token = await GenerateToken(credentials, account);
+                return token;
             }
             catch (Exception ex)
             {
                 throw ex.IfNotLoggedThenLog(Log);
             }
-
-            return token;
         }
 
         public async Task SignoutAsync(string accountSlug)

@@ -1,5 +1,10 @@
+using System;
+using System.IO;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Text;
+
 using Autofac;
 using log4net;
 
@@ -11,7 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-
+using Newtonsoft.Json;
 using Notary.Service;
 
 namespace Notary.Web
@@ -65,6 +70,7 @@ namespace Notary.Web
             var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
             config.EncryptionKey = Configuration["EncryptionKey"];
             config.ConnectionString = Configuration["ConnectionString"];
+            config.Hashing = ConfigureHashing();
 
             builder.RegisterInstance(config).SingleInstance();
 
@@ -95,6 +101,8 @@ namespace Notary.Web
 
             app.UseRouting();
 
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -115,6 +123,45 @@ namespace Notary.Web
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
+        }
+
+        private Hashing ConfigureHashing()
+        {
+            Hashing hash = null;
+            if (File.Exists(".hashing"))
+            {
+                string rawText = null;
+                using (TextReader tr = File.OpenText(".hashing"))
+                {
+                    rawText = tr.ReadToEnd();
+                }
+
+                string json = Encoding.Default.GetString(Convert.FromBase64String(rawText));
+                hash = JsonConvert.DeserializeObject<Hashing>(json);
+            }
+            else
+            {
+                var provider = RandomNumberGenerator.Create();
+                byte[] rngBytes = new byte[32];
+                provider.GetNonZeroBytes(rngBytes);
+
+                hash = new Hashing
+                {
+                    Iterations = Constants.PasswordHashIterations
+                    ,
+                    Length = Constants.PasswordHashLength,
+                    Salt = Convert.ToBase64String(rngBytes)
+                };
+                string json = JsonConvert.SerializeObject(hash);
+                string b64Json = Convert.ToBase64String(Encoding.Default.GetBytes(json));
+
+                using (TextWriter tw = new StreamWriter(File.OpenWrite(".hashing")))
+                {
+                    tw.Write(b64Json);
+                }
+            }
+
+            return hash;
         }
     }
 }

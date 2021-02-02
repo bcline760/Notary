@@ -29,12 +29,7 @@ namespace Notary
         /// <summary>
         /// Number of bytes to use for password hashes
         /// </summary>
-        public static readonly int PasswordHashLength = 16;
-
-        /// <summary>
-        /// The salt used for password hashing.
-        /// </summary>
-        public static string PasswordHashSalt = "jCRB2r#r5-K@#%PqBHnL73mRP?^eGb*cT8=d7-bAMD4z8%Fb";
+        public static readonly int PasswordHashLength = 32;
 
         public static string SigningCertificateName = "notary.pem";
     }
