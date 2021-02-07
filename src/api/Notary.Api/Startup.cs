@@ -67,8 +67,6 @@ namespace Notary.Api
         public void ConfigureContainer(ContainerBuilder builder)
         {
             var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
-            config.EncryptionKey = Configuration["EncryptionKey"];
-            config.ConnectionString = Configuration["ConnectionString"];
             config.Hashing = ConfigureHashing();
 
             builder.RegisterInstance(config).SingleInstance();
@@ -92,6 +90,8 @@ namespace Notary.Api
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {

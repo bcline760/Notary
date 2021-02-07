@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
+
+using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
     /// <summary>
     /// A basic certificate object
     /// </summary>
-    [DataContract()]
     public class Certificate : Entity
     {
 
-        [DataMember]
+        [JsonProperty("algorithm", Required = Required.Always)]
         public Algorithm Algorithm
         {
             get => default;
@@ -24,7 +24,7 @@ namespace Notary.Contract
         /// <summary>
         /// Denotes the X509 Certificate common name
         /// </summary>
-        [DataMember]
+        [JsonProperty("issuer", Required = Required.Always)]
         public DistinguishedName Issuer
         {
             get => default;
@@ -33,7 +33,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("keuUsage", Required = Required.Always)]
         public int KeyUsage
         {
             get; set;
@@ -42,13 +42,13 @@ namespace Notary.Contract
         /// <summary>
         /// Get or set whether this certificate act as the primary signing certificate.
         /// </summary>
-        [DataMember]
+        [JsonProperty("isPrimarySigning", Required = Required.Always)]
         public bool PrimarySigningCertificate { get; set; }
 
         /// <summary>
         /// The certificate is not valid before this given date.
         /// </summary>
-        [DataMember]
+        [JsonProperty("notBefore", Required = Required.Always)]
         public DateTime NotBefore
         {
             get => default;
@@ -60,7 +60,7 @@ namespace Notary.Contract
         /// <summary>
         /// The certificate is not valid after the given date
         /// </summary>
-        [DataMember]
+        [JsonProperty("notAfter", Required = Required.Always)]
         public DateTime NotAfter
         {
             get => default;
@@ -72,7 +72,7 @@ namespace Notary.Contract
         /// <summary>
         /// Get or set the date the certificate was issued
         /// </summary>
-        [DataMember]
+        [JsonProperty("revokeDate", Required = Required.Always)]
         public DateTime? RevocationDate
         {
             get => default;
@@ -81,7 +81,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("sn", Required = Required.Always)]
         public string SerialNumber
         {
             get => default;
@@ -93,13 +93,13 @@ namespace Notary.Contract
         /// <summary>
         /// The signing certificate slug
         /// </summary>
-        [DataMember]
+        [JsonProperty("signingCertSlug", Required = Required.AllowNull)]
         public string SigningCertificateSlug { get; set; }
 
-        [DataMember]
+        [JsonProperty("sibject", Required = Required.Always)]
         public DistinguishedName Subject { get; set; }
 
-        [DataMember]
+        [JsonProperty("sanList", Required = Required.AllowNull)]
         public List<SubjectAlternativeName> SubjectAlternativeNames
         {
             get => default;
@@ -108,7 +108,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("thumbprint", Required = Required.Always)]
         public string Thumbprint
         {
             get => default;

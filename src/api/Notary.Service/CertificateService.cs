@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using X509 = System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 
 using log4net;
+
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Utilities.Encoders;
 
 using Notary.Contract;
 using Notary.Interface.Repository;
 using Notary.Interface.Service;
 using Notary.Logging;
+using Org.BouncyCastle.OpenSsl;
 
 namespace Notary.Service
 {
@@ -31,11 +32,13 @@ namespace Notary.Service
         public CertificateService(
             NotaryConfiguration config,
             ICertificateRepository repository,
+            IRevocatedCertificateRepository revocatedCertificateRepo,
             ILog log,
             IEncryptionService encryption) : base(repository, log)
         {
             EncryptionService = encryption;
             Configuration = config;
+            RevocatedCertificateRepository = revocatedCertificateRepo;
         }
 
         public async Task IssueCertificateAsync(CertificateRequest request)
@@ -78,8 +81,10 @@ namespace Notary.Service
                     keyUsages
                 );
 
-                var issuedKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{generatedCertificate.Thumbprint}.key.pem";
-                var issuedCertPath = $"{Configuration.Issued.CertificateDirectory}/{generatedCertificate.Thumbprint}.cer";
+                var thumbprint = GetThumbprint(generatedCertificate);
+
+                var issuedKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{thumbprint}.key.pem";
+                var issuedCertPath = $"{Configuration.Issued.CertificateDirectory}/{thumbprint}.cer";
 
                 //Save encrypted private key and certificate to the file system
                 EncryptionService.SavePrivateKey(certificateKeyPair, issuedKeyPath, random);
@@ -96,11 +101,11 @@ namespace Notary.Service
                     NotAfter = notAfter,
                     NotBefore = DateTime.UtcNow,
                     PrimarySigningCertificate = false,
-                    SerialNumber = generatedCertificate.SerialNumber,
+                    SerialNumber = generatedCertificate.SerialNumber.ToString(16),
                     Subject = request.Subject,
                     SigningCertificateSlug = signingCert.Slug,
                     SubjectAlternativeNames = request.SubjectAlternativeNames,
-                    Thumbprint = generatedCertificate.Thumbprint
+                    Thumbprint = thumbprint
                 };
                 await SaveAsync(certificate, request.RequestedBySlug);
             }
@@ -113,11 +118,40 @@ namespace Notary.Service
         public async Task<byte[]> DownloadCertificateAsync(string slug, CertificateFormat format, string privateKeyPassword)
         {
             var certificate = await GetAsync(slug);
+            if (certificate == null)
+                return null;
+
             byte[] certificateBinary = null;
 
-            if (certificate != null)
+            var certPath = $"{Configuration.Issued.CertificateDirectory}/{certificate.Thumbprint}.cer";
+            X509Certificate cert = await LoadCertificate(certPath);
+            if (cert == null)
+                return null;
+            switch (format)
             {
-                
+                case CertificateFormat.Der:
+                    certificateBinary = cert.GetEncoded();
+                    break;
+                case CertificateFormat.Pem:
+                    break;
+                case CertificateFormat.Pkcs12:
+                    var certKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{certificate.Thumbprint}.key.pem";
+                    var certKey = EncryptionService.LoadKeyPair(certKeyPath, Configuration.EncryptionKey);
+                    var store = new Pkcs12StoreBuilder().Build();
+                    var certEntry = new X509CertificateEntry(cert);
+                    var keyEntry = new AsymmetricKeyEntry(certKey.Private);
+
+                    store.SetKeyEntry(certificate.Subject.ToString(), keyEntry, new X509CertificateEntry[] { certEntry });
+                    using (var memStream = new MemoryStream())
+                    {
+                        store.Save(memStream, privateKeyPassword.ToArray(), EncryptionService.GetSecureRandom());
+                        certificateBinary = memStream.ToArray();
+                    }
+                    break;
+                case CertificateFormat.Pkcs7:
+                    break;
+                default:
+                    throw new ArgumentException(nameof(format));
             }
 
             return certificateBinary;
@@ -125,16 +159,30 @@ namespace Notary.Service
 
         public async Task<List<RevocatedCertificate>> GetRevocatedCertificates()
         {
-            throw new NotImplementedException();
+            var revocatedCerts = await RevocatedCertificateRepository.GetAllAsync();
+            return revocatedCerts;
         }
 
-        public async Task RevokeCertificateAsync(string slug, RevocationReason reason)
+        public async Task RevokeCertificateAsync(string slug, RevocationReason reason, string userRevocatingSlug)
         {
             var certificate = await GetAsync(slug);
 
             if (certificate != null)
             {
                 certificate.RevocationDate = DateTime.UtcNow;
+                await SaveAsync(certificate, userRevocatingSlug);
+
+                var revocatedCertificate = new RevocatedCertificate
+                {
+                    Active = true,
+                    Created = DateTime.Now,
+                    CreatedBySlug = userRevocatingSlug,
+                    Reason = reason,
+                    SerialNumber = certificate.SerialNumber,
+                    Thumbprint = certificate.Thumbprint
+                };
+
+                await RevocatedCertificateRepository.SaveAsync(revocatedCertificate);
             }
         }
 
@@ -148,7 +196,7 @@ namespace Notary.Service
             var snIntermediate = EncryptionService.GenerateSerialNumber(intermediateRandom);
             var intermediateKeyPair = EncryptionService.GenerateKeyPair(intermediateRandom, 2048);
 
-            X509.X509Certificate2 rootCertificate = null, intermediateCertificate = null;
+            X509Certificate rootCertificate = null, intermediateCertificate = null;
             try
             {
                 rootCertificate = GenerateCertificate(
@@ -167,6 +215,8 @@ namespace Notary.Service
                     KeyPurposeID.IdKPCodeSigning
                     });
 
+                var rootThumb = GetThumbprint(rootCertificate);
+
                 var rootCertificateData = new Certificate
                 {
                     Active = true,
@@ -180,8 +230,8 @@ namespace Notary.Service
                     NotBefore = DateTime.UtcNow,
                     CreatedBySlug = root.RequestedBySlug,
                     PrimarySigningCertificate = false,
-                    SerialNumber = rootCertificate.SerialNumber,
-                    Thumbprint = rootCertificate.Thumbprint
+                    SerialNumber = rootCertificate.SerialNumber.ToString(16),
+                    Thumbprint = rootThumb
                 };
 
                 //Persist the certificate to the data store.
@@ -208,6 +258,8 @@ namespace Notary.Service
                     KeyPurposeID.IdKPTimeStamping
                     });
 
+                var interThumb = GetThumbprint(intermediateCertificate);
+
                 var intermediateCertificateData = new Certificate
                 {
                     Active = true,
@@ -222,8 +274,8 @@ namespace Notary.Service
                     SigningCertificateSlug = rootCertificateData.Slug,
                     CreatedBySlug = intermediate.RequestedBySlug,
                     PrimarySigningCertificate = true,
-                    SerialNumber = intermediateCertificate.SerialNumber,
-                    Thumbprint = intermediateCertificate.Thumbprint
+                    SerialNumber = intermediateCertificate.SerialNumber.ToString(),
+                    Thumbprint = interThumb
                 };
 
                 await SaveAsync(intermediateCertificateData, intermediate.RequestedBySlug);
@@ -241,13 +293,6 @@ namespace Notary.Service
             catch (CryptoException cex)
             {
                 throw cex.IfNotLoggedThenLog(Logger);
-            }
-            finally
-            {
-                if (rootCertificate != null)
-                    rootCertificate.Dispose();
-                if (intermediateCertificate != null)
-                    intermediateCertificate.Dispose();
             }
         }
 
@@ -361,7 +406,7 @@ namespace Notary.Service
             certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, sanExtension);
         }
 
-        private static X509.X509Certificate2 GenerateCertificate(List<SubjectAlternativeName> sanList, SecureRandom random,
+        private static X509Certificate GenerateCertificate(List<SubjectAlternativeName> sanList, SecureRandom random,
             string subjectDn, AsymmetricCipherKeyPair subjectKeyPair, BigInteger subjectSn, string issuerDn, DateTime notAfter,
             AsymmetricCipherKeyPair issuerKeyPair, BigInteger issuerSn, bool isCA, KeyPurposeID[] usages)
         {
@@ -370,7 +415,7 @@ namespace Notary.Service
             var issuer = new X509Name(issuerDn);
             var notBefore = DateTime.UtcNow;
             var signatureFactory = new Asn1SignatureFactory("SHA256WithRSA", issuerKeyPair.Private);
-            
+
             certGen.SetPublicKey(subjectKeyPair.Public);
             certGen.SetSerialNumber(subjectSn);
             certGen.SetSubjectDN(subject);
@@ -389,31 +434,71 @@ namespace Notary.Service
                 AddSubjectAlternativeNames(certGen, sanList);
 
             var bouncyCert = certGen.Generate(signatureFactory);
-            X509.X509Certificate2 certificate;
 
-            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-            using (var ms = new MemoryStream())
+            return bouncyCert;
+        }
+
+        /// <summary>
+        /// Load a certificate from disk
+        /// </summary>
+        /// <param name="certPath"></param>
+        /// <returns>An X.509 certificate or null if it is not on disk</returns>
+        private static async Task<X509Certificate> LoadCertificate(string certPath)
+        {
+            X509Certificate cert = null;
+
+            using (FileStream fs = File.OpenRead(certPath))
             {
-                var exportPw = Guid.NewGuid().ToString("x");
-                store.Save(ms, exportPw.ToArray(), random);
-                certificate = new X509.X509Certificate2(ms.ToArray(), exportPw, X509.X509KeyStorageFlags.Exportable);
-                return certificate;
+                var mem = new Memory<byte>();
+                int bytesRead = await fs.ReadAsync(mem);
+
+                //Ensure every byte read
+                if (mem.Length == bytesRead)
+                {
+                    var parser = new X509CertificateParser();
+                    cert = parser.ReadCertificate(mem.ToArray());
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Save the certificate binary to disk
+        /// </summary>
+        /// <param name="certificate">The X.509 certificate</param>
+        /// <param name="filePath">Path on disk of the </param>
+        private static void SaveCertificate(X509Certificate certificate, string filePath)
+        {
+            using (FileStream fs = File.OpenWrite(filePath))
+            {
+                fs.Write(certificate.GetEncoded());
             }
         }
 
-        private static void SaveCertificate(X509.X509Certificate2 certificate, string filePath)
+        /// <summary>
+        /// Get the certificate thumbprint/fingerprint
+        /// </summary>
+        /// <param name="certificate">The certificate for finding thumbprint</param>
+        /// <returns>The SHA256 thumbprint of the certificate</returns>
+        private static string GetThumbprint(X509Certificate certificate)
         {
-            byte[] certificateBinary = certificate.RawData;
+            byte[] certData = certificate.GetEncoded();
 
-            using (FileStream fs = File.OpenWrite(filePath))
-            {
-                fs.Write(certificateBinary);
-            }
+            var digest = new Sha256Digest();
+            digest.BlockUpdate(certData, 0, certData.Length);
+            byte[] digestedCert = new byte[digest.GetDigestSize()];
+            digest.DoFinal(digestedCert, 0);
+            byte[] hexBytes = Hex.Encode(digestedCert);
+
+            return Encoding.ASCII.GetString(hexBytes);
         }
         #endregion
 
-        public IEncryptionService EncryptionService { get; }
+        protected IEncryptionService EncryptionService { get; }
 
-        public NotaryConfiguration Configuration { get; }
+        protected NotaryConfiguration Configuration { get; }
+
+        protected IRevocatedCertificateRepository RevocatedCertificateRepository { get; }
     }
 }

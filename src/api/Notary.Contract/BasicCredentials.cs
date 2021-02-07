@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
+
+using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
     /// <summary>
     /// Defines basic credentials of username and password
     /// </summary>
-    [DataContract]
     public class BasicCredentials : ICredentials
     {
         /// <summary>
@@ -26,13 +26,13 @@ namespace Notary.Contract
             Expire = persistent ? DateTime.MaxValue : DateTime.UtcNow.AddHours(2);
         }
 
-        [DataMember]
+        [JsonProperty("key", Required = Required.Always)]
         public string Key { get; }
 
-        [DataMember]
+        [JsonProperty("secret", Required = Required.Always)]
         public string Secret { get; }
 
-        [DataMember]
+        [JsonProperty("expire", Required = Required.Always)]
         public DateTime Expire { get; }
     }
 }

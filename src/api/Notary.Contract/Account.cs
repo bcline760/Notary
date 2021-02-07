@@ -1,35 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
+
+using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
-    [DataContract]
     public class Account : Entity
     {
-        [DataMember]
+        [JsonProperty("address", Required = Required.Always)]
         public Address AccountAddress { get; set; }
 
-        [DataMember]
+        [JsonProperty("email", Required = Required.Always)]
         public string Email { get; set; }
 
-        [DataMember]
+        [JsonProperty("fname", Required = Required.AllowNull)]
         public string FirstName { get; set; }
 
-        [DataMember]
+        [JsonProperty("lname", Required = Required.AllowNull)]
         public string LastName { get; set; }
 
-        [DataMember]
+        [JsonIgnore]
         public string Password { get; set; }
 
-        [DataMember]
+        [JsonProperty("pKey", Required = Required.Always)]
         public string PublicKey { get; set; }
 
-        [DataMember]
+        [JsonProperty("roles", Required = Required.Always)]
         public Roles Roles { get; set; }
 
-        [DataMember]
+        [JsonProperty("username", Required = Required.Always)]
         public string Username { get; set; }
 
         /// <summary>

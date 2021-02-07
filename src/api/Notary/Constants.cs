@@ -6,6 +6,9 @@ namespace Notary
 {
     public static class Constants
     {
+        public static readonly string ConnectStrEnvName = "NOTARY_DB_CONN_STR";
+
+        public static readonly string EncryptionKeyEnvName = "NOTARY_ENC_KEY";
         /// <summary>
         /// A key size of 1,024 bits
         /// </summary>
@@ -31,6 +34,9 @@ namespace Notary
         /// </summary>
         public static readonly int PasswordHashLength = 32;
 
+        /// <summary>
+        /// Name of the JWT signing certificate
+        /// </summary>
         public static string SigningCertificateName = "notary.pem";
     }
 }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 
 using log4net;
-using NC=Notary.Contract;
+using Notary.Contract;
 using Notary.Interface.Service;
 
 namespace Notary.Web.Controllers
@@ -22,8 +23,8 @@ namespace Notary.Web.Controllers
             accountService = accountSvc;
         }
 
-        [HttpPost("signin")]
-        public async Task<IActionResult> SignInAsync(NC.ICredentials credentials)
+        [HttpPost, Route("signin")]
+        public async Task<IActionResult> SignInAsync([FromBody]BasicCredentials credentials)
         {
             if (credentials == null)
                 return BadRequest();
@@ -31,6 +32,22 @@ namespace Notary.Web.Controllers
             var token = await ExecuteServiceMethod(sessionService.SignInAsync, credentials, HttpStatusCode.OK, HttpStatusCode.Unauthorized);
 
             return token;
+        }
+
+        [HttpPost, Route("signout")]
+        public async Task<IActionResult> SignOutAsync()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return BadRequest();
+
+            if (User.HasClaim(c => c.Type == "slug"))
+            {
+                string slug = User.Claims.First(s => s.Type == "slug").Value;
+
+                return await ExecuteServiceMethod(sessionService.SignoutAsync, slug, HttpStatusCode.OK);
+            }
+
+            return NoContent();
         }
 
         private readonly ISessionService sessionService;

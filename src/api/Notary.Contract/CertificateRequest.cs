@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
+
+using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
@@ -10,34 +11,33 @@ namespace Notary.Contract
     {
         public CertificateRequest()
         {
-            SubjectAlternativeNames = new List<SubjectAlternativeName>();
         }
 
         /// <summary>
         /// Get or set the expiration length in hours.
         /// </summary>
-        [DataMember]
+        [JsonProperty("expireLength", Required = Required.Always)]
         public int LengthInHours { get; set; }
 
         /// <summary>
         /// Get or set the X500 Distinguished Name for the certificate subject.
         /// </summary>
-        [DataMember]
+        [JsonProperty("subject", Required = Required.Always)]
         public DistinguishedName Subject { get; set; }
 
         /// <summary>
         /// Get a list of SAN for the certificate
         /// </summary>
-        [DataMember]
+        [JsonProperty("sanList", Required = Required.AllowNull)]
         public List<SubjectAlternativeName> SubjectAlternativeNames
         {
-            get;
+            get; set;
         }
 
         /// <summary>
         /// Get or set the account slug that requested this certificate
         /// </summary>
-        [DataMember]
+        [JsonProperty("reqeustedBy", Required = Required.Always)]
         public string RequestedBySlug { get; set; }
     }
 }

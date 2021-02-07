@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using System.Text;
+
+using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
@@ -10,7 +10,7 @@ namespace Notary.Contract
     /// </summary>
     public class DistinguishedName
     {
-        [DataMember]
+        [JsonProperty("cn", Required = Required.Always)]
         public string CommonName
         {
             get => default;
@@ -20,7 +20,7 @@ namespace Notary.Contract
         }
 
 
-        [DataMember]
+        [JsonProperty("c", Required = Required.AllowNull)]
         public string Country
         {
             get => default;
@@ -29,7 +29,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("l", Required = Required.AllowNull)]
         public string Locale
         {
             get => default;
@@ -38,7 +38,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("o", Required = Required.AllowNull)]
         public string Organization
         {
             get => default;
@@ -47,7 +47,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("ou", Required = Required.AllowNull)]
         public string OrganizationalUnit
         {
             get => default;
@@ -56,7 +56,7 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("s", Required = Required.AllowNull)]
         public string StateProvince
         {
             get => default;
@@ -87,6 +87,15 @@ namespace Notary.Contract
                 sb.AppendFormat("ST={0},", issuer.StateProvince);
 
             return sb.ToString().Trim(',');
+        }
+
+        /// <summary>
+        /// Makes a DN string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return BuildDistinguishedName(this);
         }
     }
 }

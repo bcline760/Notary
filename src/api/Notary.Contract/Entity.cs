@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
+using Newtonsoft.Json;
+
 namespace Notary.Contract
 {
     [DataContract]
@@ -13,7 +15,7 @@ namespace Notary.Contract
         /// <summary>
         /// Get or set identifying slug of the entit
         /// </summary>
-        [DataMember]
+        [JsonProperty("slug", Required = Required.Always)]
         public string Slug
         {
             get => default;
@@ -25,7 +27,7 @@ namespace Notary.Contract
         /// <summary>
         /// Get or set in which the entity was created
         /// </summary>
-        [DataMember]
+        [JsonProperty("created", Required = Required.Always)]
         public DateTime Created
         {
             get => default;
@@ -34,13 +36,13 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("createdBySlug", Required = Required.Always)]
         public string CreatedBySlug { get; set; }
 
         /// <summary>
         /// Get or set the last time the entity was updated
         /// </summary>
-        [DataMember]
+        [JsonProperty("updated", Required = Required.AllowNull)]
         public DateTime? Updated
         {
             get => default;
@@ -49,13 +51,13 @@ namespace Notary.Contract
             }
         }
 
-        [DataMember]
+        [JsonProperty("updatedBySlug", Required = Required.AllowNull)]
         public string UpdatedBySlug { get; set; }
 
         /// <summary>
         /// Get or set whether this entity is active
         /// </summary>
-        [DataMember]
+        [JsonProperty("active", Required = Required.Always)]
         public bool Active
         {
             get => default;
