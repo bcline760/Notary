@@ -23,6 +23,9 @@ namespace Notary.Service
             builder.RegisterType<EncryptionService>()
                 .As<IEncryptionService>()
                 .InstancePerLifetimeScope();
+            builder.RegisterType<TokenService>()
+                .As<ITokenService>()
+                .InstancePerLifetimeScope();
 
             builder.Register(r =>
             {
@@ -38,6 +41,15 @@ namespace Notary.Service
                             null,
                             r.Resolve<IEncryptionService>(),
                             config
+                        );
+                        break;
+                    case AuthenticationProvider.ActiveDirectory:
+                        session = new LdapSessionService(
+                            r.Resolve<ILog>(),
+                            r.Resolve<IAccountService>(),
+                            r.Resolve<ITokenService>(),
+                            r.Resolve<IEncryptionService>(),
+                            r.Resolve<NotaryConfiguration>()
                         );
                         break;
                 }

@@ -51,7 +51,7 @@ namespace Notary.Service
 
                 //Load the issuer's private key from the file system.
                 string signingPrivateKeyPath = $"{Configuration.Intermediate.PrivateKeyDirectory}/{signingCert.Thumbprint}.key.pem";
-                var issuerKeyPair = EncryptionService.LoadKeyPair(signingPrivateKeyPath, Configuration.EncryptionKey);
+                var issuerKeyPair = EncryptionService.LoadKeyPair(signingPrivateKeyPath, Configuration.ApplicationKey);
 
                 var issuerSn = new BigInteger(signingCert.SerialNumber, 16);
                 var random = EncryptionService.GetSecureRandom();
@@ -136,7 +136,7 @@ namespace Notary.Service
                     break;
                 case CertificateFormat.Pkcs12:
                     var certKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{certificate.Thumbprint}.key.pem";
-                    var certKey = EncryptionService.LoadKeyPair(certKeyPath, Configuration.EncryptionKey);
+                    var certKey = EncryptionService.LoadKeyPair(certKeyPath, Configuration.ApplicationKey);
                     var store = new Pkcs12StoreBuilder().Build();
                     var certEntry = new X509CertificateEntry(cert);
                     var keyEntry = new AsymmetricKeyEntry(certKey.Private);

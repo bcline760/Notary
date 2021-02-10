@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 using log4net;
 using Notary.Contract;
@@ -23,6 +24,7 @@ namespace Notary.Web.Controllers
             accountService = accountSvc;
         }
 
+        [AllowAnonymous]
         [HttpPost, Route("signin")]
         public async Task<IActionResult> SignInAsync([FromBody]BasicCredentials credentials)
         {

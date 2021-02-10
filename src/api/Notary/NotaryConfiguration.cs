@@ -19,7 +19,7 @@ namespace Notary
 
         public DirectorySettings DirectorySettings { get; set; }
 
-        public string EncryptionKey { get; set; }
+        public string ApplicationKey { get; set; }
 
         /// <summary>
         /// Get or set the hashing properties for PBKDF
@@ -95,7 +95,5 @@ namespace Notary
         public string Audience { get; set; }
 
         public string Issuer { get; set; }
-
-        public string SigningCertificatePath { get; set; }
     }
 }

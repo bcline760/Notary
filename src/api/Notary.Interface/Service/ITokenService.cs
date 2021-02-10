@@ -9,7 +9,7 @@ namespace Notary.Interface.Service
     /// <summary>
     /// Service which handles API tokens.
     /// </summary>
-    public interface ITokenService
+    public interface ITokenService : IEntityService<ApiToken>
     {
         /// <summary>
         /// Get a list of tokens by the account.
@@ -17,12 +17,5 @@ namespace Notary.Interface.Service
         /// <param name="slug"></param>
         /// <returns></returns>
         Task<List<ApiToken>> GetAccountTokens(string slug);
-
-        /// <summary>
-        /// Save a token to the data store.
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        Task SaveAsync(ApiToken token);
     }
 }

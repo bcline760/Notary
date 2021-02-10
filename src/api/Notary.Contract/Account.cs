@@ -8,6 +8,11 @@ namespace Notary.Contract
 {
     public class Account : Entity
     {
+        public Account():base()
+        {
+
+        }
+
         [JsonProperty("address", Required = Required.Always)]
         public Address AccountAddress { get; set; }
 

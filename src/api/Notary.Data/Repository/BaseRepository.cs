@@ -44,53 +44,38 @@ namespace Notary.Data.Repository
 
         public virtual async Task DeleteByIdAsync(string id, string updatedBySlug)
         {
-            throw new NotImplementedException();
+            var contract = await GetAsync(id);
+            contract.Active = false;
+            contract.UpdatedBySlug = updatedBySlug;
+            contract.Updated = DateTime.UtcNow;
+
+            await SaveAsync(contract);
         }
 
         public virtual async Task<List<TC>> GetAllAsync()
         {
             var filter = Builders<TM>.Filter.Empty;
-            var collection = await Collection.FindAsync(filter);
 
-            List<TC> records = new List<TC>();
-            if (collection.Any())
+            var contracts = new List<TC>();
+            using (var collection = await Collection.FindAsync(filter))
             {
                 var models = await collection.ToListAsync();
-                records.AddRange(Mapper.Map<List<TC>>(models));
+                contracts.AddRange(Mapper.Map<List<TC>>(models));
             }
-
-            return records;
+            return contracts;
         }
 
         public virtual async Task<TC> GetAsync(string slug)
         {
             var filter = Builders<TM>.Filter.Eq("slug", slug);
 
-            var result = await Collection.FindAsync(filter);
-
-            if (result.Any())
-            {
-                var doc = await result.FirstAsync();
-                var map = Mapper.Map<TC>(doc);
-                return map;
-            }
-
-            return null;
+            return await RunQuery(filter);
         }
 
         public virtual async Task<TC> GetByIdAsync(string id)
         {
             var filter = Builders<TM>.Filter.Eq("id", id);
-            var result = await Collection.FindAsync(filter);
-
-            if (result.Any())
-            {
-                var doc = await result.FirstAsync();
-                var map = Mapper.Map<TC>(doc);
-                return map;
-            }
-
-            return null;
+            return await RunQuery(filter);
         }
 
         public virtual async Task SaveAsync(TC entity)
@@ -106,6 +91,9 @@ namespace Notary.Data.Repository
             var model = Mapper.Map<TM>(entity);
             var filter = Builders<TM>.Filter.Eq("slug", model.Slug);
             var result = await Collection.ReplaceOneAsync(filter, model, new ReplaceOptions { IsUpsert = true });
+
+            if (!result.IsAcknowledged)
+                throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -140,6 +128,14 @@ namespace Notary.Data.Repository
             Regex s_seperateWordRegex =
                             new Regex(@"(?<=[A-Z])(?=[A-Z][a-z]) | (?<=[^A-Z])(?=[A-Z]) | (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
             return collectionName.ToLowerInvariant();
+        }
+
+        protected async Task<TC> RunQuery(FilterDefinition<TM> filter)
+        {
+            var result = await Collection.FindAsync(filter);
+            var doc = await result.FirstAsync();
+            var map = Mapper.Map<TC>(doc);
+            return map;
         }
     }
 }

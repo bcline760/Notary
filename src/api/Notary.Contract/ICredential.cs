@@ -19,6 +19,6 @@ namespace Notary.Contract
         /// <summary>
         /// Get when the credential will expire.
         /// </summary>
-        DateTime Expire { get; }
+        bool Persistant { get; }
     }
 }

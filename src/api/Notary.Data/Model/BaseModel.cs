@@ -1,18 +1,22 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Notary.Data.Model
 {
     [BsonIgnoreExtraElements]
     [BsonDiscriminator(RootClass = true)]
-    [BsonKnownTypes(typeof(CertificateModel), typeof(AccountModel))]
+    [BsonKnownTypes(
+        typeof(CertificateModel),
+        typeof(AccountModel),
+        typeof(RevocatedCertificateModel),
+        typeof(TokenModel))]
     public abstract class BaseModel
     {
         [BsonIgnoreIfDefault,BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
 
         [BsonElement, BsonRequired]
         public string Slug { get; set; }

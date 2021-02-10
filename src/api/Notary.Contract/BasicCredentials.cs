@@ -11,28 +11,18 @@ namespace Notary.Contract
     /// </summary>
     public class BasicCredentials : ICredentials
     {
-        /// <summary>
-        /// Construct a new basic credentials object for a username/password combination
-        /// </summary>
-        /// <param name="username">The username of the credentials</param>
-        /// <param name="password">The password of the credentials</param>
-        /// <param name="persistent">Set to whether the credentials expire or not.</param>
-        public BasicCredentials(string username, string password, bool persistent)
+        public BasicCredentials()
         {
-            Key = username;
-            Secret = password;
 
-            //TODO: Not hardcode hours
-            Expire = persistent ? DateTime.MaxValue : DateTime.UtcNow.AddHours(2);
         }
 
         [JsonProperty("key", Required = Required.Always)]
-        public string Key { get; }
+        public string Key { get; set; }
 
         [JsonProperty("secret", Required = Required.Always)]
-        public string Secret { get; }
+        public string Secret { get; set; }
 
-        [JsonProperty("expire", Required = Required.Always)]
-        public DateTime Expire { get; }
+        [JsonProperty("persistant", Required = Required.Always)]
+        public bool Persistant { get; set; }
     }
 }

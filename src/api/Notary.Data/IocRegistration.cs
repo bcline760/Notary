@@ -27,6 +27,8 @@ namespace Notary.Data
                         .ReverseMap();
                     cfg.CreateMap<Account, AccountModel>().ReverseMap();
                     cfg.CreateMap<ApiToken, TokenModel>().ReverseMap();
+                    cfg.CreateMap<RevocatedCertificate, RevocatedCertificateModel>().ReverseMap();
+                    cfg.CreateMap<Address, AddressModel>().ReverseMap();
                 });
 
                 var map = mapConfig.CreateMapper();
@@ -47,6 +49,7 @@ namespace Notary.Data
 
             builder.RegisterType<AccountRepository>().As<IAccountRepository>().InstancePerLifetimeScope();
             builder.RegisterType<CertificateRepository>().As<ICertificateRepository>().InstancePerLifetimeScope();
+            builder.RegisterType<RevocatedCertificateRepository>().As<IRevocatedCertificateRepository>().InstancePerLifetimeScope();
             builder.RegisterType<TokenRepository>().As<ITokenRepository>().InstancePerLifetimeScope();
         }
     }

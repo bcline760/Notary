@@ -17,7 +17,6 @@ namespace Notary.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class AccountController : NotaryDataController<Account>
     {
         public AccountController(

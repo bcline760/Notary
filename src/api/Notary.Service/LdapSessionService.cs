@@ -14,18 +14,19 @@ using Notary.Service.Directory;
 
 namespace Notary.Service
 {
-    internal class LdapSessionService : SessionService, ISessionService
+    internal class LdapSessionService : SessionService, ISessionService, IDisposable
     {
         private readonly string[] _attributes = {
         "objectSid", "objectGUID", "objectCategory", "objectClass", "memberOf", "name", "cn", "distinguishedName",
         "sAMAccountName", "sAMAccountName", "userPrincipalName", "displayName", "givenName", "sn", "description",
         "telephoneNumber", "mail", "streetAddress", "postalCode", "l", "st", "co", "c"
         };
+        private bool disposedValue;
 
         public LdapSessionService(
             ILog log,
             IAccountService accountRepository,
-            ITokenService tokenRepository,
+            ITokenService tokenService,
             IEncryptionService encryptionService,
             NotaryConfiguration notaryConfiguration)
         {
@@ -33,7 +34,7 @@ namespace Notary.Service
             Log = log;
             Account = accountRepository;
             Encryption = encryptionService;
-            Token = tokenRepository;
+            Token = tokenService;
 
             Connection = GetConnection();
         }
@@ -53,7 +54,7 @@ namespace Notary.Service
                 var account = await Account.GetByEmailAsync(entity.Email);
                 if (account == null)
                 {
-                    account = new Account
+                    var newAccount = new Account
                     {
                         AccountAddress = new Address
                         {
@@ -69,17 +70,18 @@ namespace Notary.Service
                         FirstName = entity.FirstName,
                         LastName = entity.LastName,
                         Roles = GetRole(entity.MemberOf),
-                        Username = entity.UserName
+                        Username = entity.SamAccountName
                     };
 
-                    await Account.RegisterAccountAsync(account);
+                    await Account.RegisterAccountAsync(newAccount);
                 }
                 ApiToken token = await GenerateToken(credentials, account);
                 return token;
             }
             catch (Exception ex)
             {
-                throw ex.IfNotLoggedThenLog(Log);
+                ex.IfNotLoggedThenLog(Log);
+                return null;
             }
         }
 
@@ -119,7 +121,7 @@ namespace Notary.Service
             var searchResults = Connection.Search(Configuration.DirectorySettings.SearchBase, LdapConnection.ScopeSub, filter, _attributes, false);
 
             DirectoryEntity user = null;
-            Connection.Bind(Configuration.DirectorySettings.ServiceAccountUser, Configuration.DirectorySettings.ServiceAccountPassword);
+
             while (searchResults.HasMore())
             {
                 LdapEntry entry = searchResults.Next();
@@ -130,5 +132,31 @@ namespace Notary.Service
         }
 
         private LdapConnection Connection { get; }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (Connection !=null)
+                    {
+                        Connection.Disconnect();
+                        Connection.Dispose();
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

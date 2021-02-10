@@ -7,9 +7,6 @@ using Newtonsoft.Json;
 
 namespace Notary.Contract
 {
-    [DataContract]
-    [KnownType(typeof(Certificate))]
-    [KnownType(typeof(ApiToken))]
     public abstract class Entity : IComparable<Entity>, IEquatable<Entity>, ISluggable
     {
         /// <summary>
@@ -18,10 +15,7 @@ namespace Notary.Contract
         [JsonProperty("slug", Required = Required.Always)]
         public string Slug
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         /// <summary>
@@ -30,10 +24,7 @@ namespace Notary.Contract
         [JsonProperty("created", Required = Required.Always)]
         public DateTime Created
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("createdBySlug", Required = Required.Always)]
@@ -45,10 +36,7 @@ namespace Notary.Contract
         [JsonProperty("updated", Required = Required.AllowNull)]
         public DateTime? Updated
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("updatedBySlug", Required = Required.AllowNull)]
@@ -60,10 +48,7 @@ namespace Notary.Contract
         [JsonProperty("active", Required = Required.Always)]
         public bool Active
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         public int CompareTo(Entity other)

@@ -34,6 +34,7 @@ namespace Notary.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,7 +49,20 @@ namespace Notary.Api
                     ValidateIssuer = true,
                     ValidateTokenReplay = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new X509SecurityKey(new X509Certificate2("notary.cer"))
+                    IssuerSigningKey = new SymmetricSecurityKey(LoadEncryptionKey()),
+                    ValidAudience = config.TokenSettings.Audience,
+                    ValidIssuer = config.TokenSettings.Issuer
+                };
+
+                x.Events = new JwtBearerEvents()
+                {
+                    OnAuthenticationFailed = async (AuthenticationFailedContext arg) =>
+                    {
+                        Console.WriteLine(arg.Exception.Message);
+                    },
+                    OnTokenValidated = async (TokenValidatedContext arg) =>
+                    {
+                    }
                 };
             });
             services.AddAuthorization(o =>
@@ -121,8 +135,7 @@ namespace Notary.Api
 
                 hash = new Hashing
                 {
-                    Iterations = Constants.PasswordHashIterations
-                    ,
+                    Iterations = Constants.PasswordHashIterations,
                     Length = Constants.PasswordHashLength,
                     Salt = Convert.ToBase64String(rngBytes)
                 };
@@ -136,6 +149,36 @@ namespace Notary.Api
             }
 
             return hash;
+        }
+
+        //TODO: Figure out how to refactor this properly
+        private byte[] LoadEncryptionKey()
+        {
+            byte[] encryptionKey = null;
+            string path = $"{Environment.CurrentDirectory}/notary.key";
+            if (File.Exists("notary.key"))
+            {
+                using (FileStream fs = File.OpenRead(path))
+                {
+                    encryptionKey = new byte[fs.Length];
+                    int bytesRead = fs.Read(encryptionKey);
+                }
+            }
+            else
+            {
+                using (RSA rsa = RSA.Create())
+                {
+                    encryptionKey = rsa.ExportRSAPrivateKey();
+
+                    // Write the key to disk for future use.
+                    using (FileStream fs = File.OpenWrite(path))
+                    {
+                        fs.Write(encryptionKey);
+                    }
+                }
+            }
+
+            return encryptionKey;
         }
     }
 }

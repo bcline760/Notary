@@ -41,7 +41,7 @@ namespace Notary.Service
         {
             string path = $"{_config.UserKeyPath}/{accountSlug}.key.pem";
 
-            var keyPair = LoadKeyPair(path, _config.EncryptionKey);
+            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
             var decryptEngine = new Pkcs1Encoding(new RsaEngine());
             decryptEngine.Init(false, keyPair.Private);
 
@@ -53,7 +53,7 @@ namespace Notary.Service
         {
             string path = $"{_config.UserKeyPath}/{accountSlug}.key.pem";
 
-            var keyPair = LoadKeyPair(path, _config.EncryptionKey);
+            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
             var encryptEngine = new Pkcs1Encoding(new RsaEngine());
             encryptEngine.Init(true, keyPair.Public);
 
@@ -171,18 +171,22 @@ namespace Notary.Service
 
         public string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry)
         {
-            var certificate = (X509Certificate2)X509Certificate.CreateFromCertFile(_config.TokenSettings.SigningCertificatePath);
-            SigningCredentials signingCredentials = new X509SigningCredentials(certificate);
+            byte[] key = LoadEncryptionKey();
+            var ssk = new SymmetricSecurityKey(key);
+            SigningCredentials signingCredentials = new SigningCredentials(ssk, SecurityAlgorithms.HmacSha256Signature);
             var jwtHandler = new JwtSecurityTokenHandler();
             var tokenDesc = new SecurityTokenDescriptor
             {
                 SigningCredentials = signingCredentials,
                 Subject = claims,
-                NotBefore = DateTime.Now,
-                Expires = tokenExpiry,
+                NotBefore = DateTime.UtcNow,
                 Issuer = _config.TokenSettings.Issuer,
-                Audience = _config.TokenSettings.Audience
+                Audience = _config.TokenSettings.Audience,
+                IssuedAt = DateTime.UtcNow
             };
+
+            if (tokenExpiry != DateTime.MaxValue)
+                tokenDesc.Expires = tokenExpiry;
 
             var t = jwtHandler.CreateToken(tokenDesc);
             string token = jwtHandler.WriteToken(t);
@@ -193,7 +197,7 @@ namespace Notary.Service
         public void SavePrivateKey(AsymmetricCipherKeyPair keyPair, string filePath, SecureRandom encryptionRandom)
         {
             var generator = new Pkcs8Generator(keyPair.Private, Pkcs8Generator.PbeSha1_3DES);
-            generator.Password = _config.EncryptionKey.ToCharArray();
+            generator.Password = _config.ApplicationKey.ToCharArray();
             generator.SecureRandom = encryptionRandom;
             generator.IterationCount = 32;
 
@@ -207,9 +211,11 @@ namespace Notary.Service
             }
         }
 
-        public ClaimsPrincipal ValidateJwt(string token, X509Certificate2 signingCertificate, string issuer, string audience)
+        public ClaimsPrincipal ValidateJwt(string token, string issuer, string audience)
         {
-            SigningCredentials signingCredentials = new X509SigningCredentials(signingCertificate);
+            byte[] key = LoadEncryptionKey();
+            var ssk = new SymmetricSecurityKey(key);
+            SigningCredentials signingCredentials = new SigningCredentials(ssk, SecurityAlgorithms.HmacSha256Signature);
 
             var handler = new JwtSecurityTokenHandler();
             var validationParams = new TokenValidationParameters
@@ -266,6 +272,35 @@ namespace Notary.Service
             }
 
             return hashedPwd.AreBytesEqual(passwordHash);
+        }
+
+        private byte[] LoadEncryptionKey()
+        {
+            byte[] encryptionKey = null;
+            string path = $"{Environment.CurrentDirectory}/notary.key";
+            if (File.Exists("notary.key"))
+            {
+                using (FileStream fs = File.OpenRead(path))
+                {
+                    encryptionKey = new byte[fs.Length];
+                    int bytesRead = fs.Read(encryptionKey);
+                }
+            }
+            else
+            {
+                using (RSA rsa = RSA.Create())
+                {
+                    encryptionKey = rsa.ExportRSAPrivateKey();
+
+                    // Write the key to disk for future use.
+                    using (FileStream fs = File.OpenWrite(path))
+                    {
+                        fs.Write(encryptionKey);
+                    }
+                }
+            }
+
+            return encryptionKey;
         }
     }
 }

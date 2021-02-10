@@ -28,19 +28,20 @@ namespace Notary.Service
 
         protected async Task<ApiToken> GenerateToken(ICredentials credentials, Account user)
         {
+            DateTime expiration = credentials.Persistant ? DateTime.MaxValue : DateTime.Now.AddHours(2);
             var identity = new ClaimsIdentity(new List<Claim>()
             {
-                new Claim(ClaimTypes.Email,credentials.Key),
+                new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.GivenName, $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.AuthenticationMethod, "JWT"),
-                new Claim(ClaimTypes.Expiration, credentials.Expire.ToString()),
-                new Claim(ClaimTypes.IsPersistent, (credentials.Expire == DateTime.MaxValue).ToString()),
-                new Claim(ClaimTypes.Authentication,"true"),
+                new Claim(ClaimTypes.Expiration, expiration.ToString()),
+                new Claim(ClaimTypes.IsPersistent, credentials.Persistant.ToString()),
                 new Claim("slug", user.Slug),
-                new Claim(ClaimTypes.Role, user.Roles.ToString())
+                new Claim(ClaimTypes.Role, user.Roles.ToString()),
+                new Claim(ClaimTypes.Hash, Encryption.Hash(DateTime.UtcNow.Ticks.ToString()))
             });
 
-            var token = Encryption.GenerateJwt(identity, credentials.Expire);
+
+            var token = Encryption.GenerateJwt(identity, expiration);
 
             var apiToken = new ApiToken()
             {
@@ -48,12 +49,12 @@ namespace Notary.Service
                 Created = DateTime.UtcNow,
                 CreatedBySlug = user.Slug,
                 Active = true,
-                Expiry = credentials.Expire,
+                Expiry = expiration,
                 Token = token
             };
 
             //Save the token to the database
-            await Token.SaveAsync(apiToken);
+            await Token.SaveAsync(apiToken, user.CreatedBySlug);
             return apiToken;
         }
 

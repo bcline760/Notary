@@ -105,11 +105,10 @@ namespace Notary.Interface.Service
         /// Validate a JWT agains the issuer and audience for authenticity
         /// </summary>
         /// <param name="token">The JWT to validate</param>
-        /// <param name="signingCertificate">The certificate used to verify the signature</param>
         /// <param name="issuer">The issuer to validate the JWT</param>
         /// <param name="audience">The audience of the JWT</param>
         /// <returns>A set of claims or null if the token is invalid</returns>
-        ClaimsPrincipal ValidateJwt(string token, X509Certificate2 signingCertificate, string issuer, string audience);
+        ClaimsPrincipal ValidateJwt(string token, string issuer, string audience);
 
         /// <summary>
         /// Verify the password to ash to see if it is a valid hash.

@@ -22,14 +22,8 @@ namespace Notary.Data.Repository
         public async Task<Account> GetByEmailAddressAsync(string email)
         {
             var filter = Builders<AccountModel>.Filter.Eq("email", email);
-            var collection = await Collection.FindAsync(filter);
-            if (collection.Any())
-            {
-                var a = await collection.FirstAsync();
-                return Mapper.Map<Account>(a);
-            }
 
-            return null;
+            return await RunQuery(filter);
         }
     }
 }
