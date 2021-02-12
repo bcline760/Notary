@@ -30,7 +30,10 @@ namespace Notary.Contract
 
         public override string[] SlugProperties()
         {
-            throw new NotImplementedException();
+            return new string[]
+            {
+                Thumbprint
+            };
         }
     }
 }

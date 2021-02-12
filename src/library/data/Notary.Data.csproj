@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Notary.Contract\Notary.Contract.csproj" />
-    <ProjectReference Include="..\Notary.Interface\Notary.Interface.csproj" />
-    <ProjectReference Include="..\Notary\Notary.csproj" />
+    <ProjectReference Include="../contract/Notary.Contract.csproj" />
+    <ProjectReference Include="../interface/Notary.Interface.csproj" />
+    <ProjectReference Include="../core/Notary.csproj" />
   </ItemGroup>
 
 </Project>

@@ -24,12 +24,11 @@ namespace Notary.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            HostEnvironment = env;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -45,10 +44,10 @@ namespace Notary.Api
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = true,
-                    ValidateIssuer = true,
-                    ValidateTokenReplay = true,
-                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = HostEnvironment.IsProduction(),
+                    ValidateIssuer = HostEnvironment.IsProduction(),
+                    ValidateTokenReplay = HostEnvironment.IsProduction(),
+                    ValidateIssuerSigningKey = HostEnvironment.IsProduction(),
                     IssuerSigningKey = new SymmetricSecurityKey(LoadEncryptionKey()),
                     ValidAudience = config.TokenSettings.Audience,
                     ValidIssuer = config.TokenSettings.Issuer
@@ -90,9 +89,9 @@ namespace Notary.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            if (HostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
@@ -180,5 +179,10 @@ namespace Notary.Api
 
             return encryptionKey;
         }
+
+
+        public IConfiguration Configuration { get; }
+
+        public IWebHostEnvironment HostEnvironment { get; }
     }
 }

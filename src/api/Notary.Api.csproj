@@ -18,10 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Notary\Notary.csproj" />
-    <ProjectReference Include="..\Notary.Contract\Notary.Contract.csproj" />
-    <ProjectReference Include="..\Notary.Interface\Notary.Interface.csproj" />
-    <ProjectReference Include="..\Notary.Service\Notary.Service.csproj" />
+    <ProjectReference Include="../library/core/Notary.csproj" />
+    <ProjectReference Include="../library/contract/Notary.Contract.csproj" />
+    <ProjectReference Include="../library/interface/Notary.Interface.csproj" />
+    <ProjectReference Include="../library/service/Notary.Service.csproj" />
   </ItemGroup>
 
 </Project>

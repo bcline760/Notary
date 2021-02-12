@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using Notary.Logging;
 
-namespace Notary.Web.Controllers
+namespace Notary.Api.Controllers
 {
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -106,6 +106,39 @@ namespace Notary.Web.Controllers
                 await serviceMethod(svcParam);
 
                 return GetHttpResponseCode<object>(successCode, null);
+            }
+            catch (Exception ex)
+            {
+                ex.IfNotLoggedThenLog(Log);
+                result = StatusCode((int)HttpStatusCode.InternalServerError);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Execute a service method
+        /// </summary>
+        /// <typeparam name="TIn">First argument type</typeparam>
+        /// <typeparam name="TIn2">Second argument type</typeparam>
+        /// <param name="serviceMethod">A delegate for the service method to be executed</param>
+        /// <param name="param1">First argument of method</param>
+        /// <param name="param2">Second argument of method</param>
+        /// <param name="code">The HTTP status code to return upon completion</param>
+        /// <returns></returns>
+        protected async Task<IActionResult> ExecuteServiceMethod<TIn, TIn2>(
+            Func<TIn, TIn2, Task> serviceMethod,
+            TIn param1,
+            TIn2 param2,
+            HttpStatusCode code)
+        {
+            IActionResult result = null;
+
+            try
+            {
+                await serviceMethod(param1, param2);
+
+                return GetHttpResponseCode<object>(code, null);
             }
             catch (Exception ex)
             {

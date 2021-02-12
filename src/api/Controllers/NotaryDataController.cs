@@ -12,9 +12,8 @@ using Notary.Interface.Service;
 
 using log4net;
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
 
-namespace Notary.Web.Controllers
+namespace Notary.Api.Controllers
 {
     public abstract class NotaryDataController<T> : NotaryController
         where T : Entity

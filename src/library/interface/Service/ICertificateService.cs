@@ -44,5 +44,12 @@ namespace Notary.Interface.Service
         /// <param name="thumbprint">The certificate thumbprint</param>
         /// <param name="reason">The reason for its revocation</param>
         Task RevokeCertificateAsync(string slug, RevocationReason reason, string userRevocatingSlug);
+
+        /// <summary>
+        /// Generate the CA certificates as needed for issuing certificates
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="intermediate"></param>
+        Task GenerateCaCertificates(CertificateRequest root, CertificateRequest intermediate);
     }
 }

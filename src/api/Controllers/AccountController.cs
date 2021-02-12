@@ -13,7 +13,7 @@ using Notary.Contract;
 using Notary.Interface.Service;
 using Notary.Logging;
 
-namespace Notary.Web.Controllers
+namespace Notary.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

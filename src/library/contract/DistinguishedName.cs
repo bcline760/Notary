@@ -13,56 +13,38 @@ namespace Notary.Contract
         [JsonProperty("cn", Required = Required.Always)]
         public string CommonName
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
 
         [JsonProperty("c", Required = Required.AllowNull)]
         public string Country
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("l", Required = Required.AllowNull)]
         public string Locale
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("o", Required = Required.AllowNull)]
         public string Organization
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("ou", Required = Required.AllowNull)]
         public string OrganizationalUnit
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [JsonProperty("s", Required = Required.AllowNull)]
         public string StateProvince
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         /// <summary>

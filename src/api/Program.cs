@@ -1,16 +1,25 @@
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Notary.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var webHost = CreateHostBuilder(args).Build();
+
+            using (var scope = webHost.Services.CreateScope())
+            {
+            }
+
+            await webHost.RunAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

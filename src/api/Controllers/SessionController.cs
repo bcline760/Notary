@@ -11,7 +11,7 @@ using log4net;
 using Notary.Contract;
 using Notary.Interface.Service;
 
-namespace Notary.Web.Controllers
+namespace Notary.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -19,7 +19,7 @@ COPY ["src/Notary.Service/Notary.Service.csproj", "src/Notary.Service/"]
 COPY ["src/Notary.Data/Notary.Data.csproj", "src/Notary.Data/"]
 RUN dotnet restore "src/Notary.Web/Notary.Web.csproj"
 COPY . .
-WORKDIR "/src/src/Notary.Web"
+WORKDIR "/src/Notary.Web"
 RUN dotnet build "Notary.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish
