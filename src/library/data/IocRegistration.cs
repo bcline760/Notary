@@ -26,7 +26,7 @@ namespace Notary.Data
                         .ForMember(c => c.KeyUsage, obj => obj.MapFrom(m => (short)m.KeyUsage))
                         .ReverseMap();
                     cfg.CreateMap<Account, AccountModel>().ReverseMap();
-                    cfg.CreateMap<ApiToken, TokenModel>().ReverseMap();
+                    cfg.CreateMap<AuthenticatedUser, TokenModel>().ReverseMap();
                     cfg.CreateMap<RevocatedCertificate, RevocatedCertificateModel>().ReverseMap();
                     cfg.CreateMap<Address, AddressModel>().ReverseMap();
                 });

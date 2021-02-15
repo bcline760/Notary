@@ -9,13 +9,13 @@ using Notary.Interface.Service;
 
 namespace Notary.Service
 {
-    public class TokenService : EntityService<ApiToken>, ITokenService
+    public class TokenService : EntityService<AuthenticatedUser>, ITokenService
     {
         public TokenService(ITokenRepository repo, ILog log):base(repo, log)
         {
         }
 
-        public async Task<List<ApiToken>> GetAccountTokens(string slug)
+        public async Task<List<AuthenticatedUser>> GetAccountTokens(string slug)
         {
             var repo = (ITokenRepository)Repository;
 

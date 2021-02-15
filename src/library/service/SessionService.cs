@@ -16,7 +16,7 @@ namespace Notary.Service
 {
     internal abstract class SessionService
     {
-        public async Task<List<ApiToken>> GetSessions(string accountSlug, bool activeOnly)
+        public async Task<List<AuthenticatedUser>> GetSessions(string accountSlug, bool activeOnly)
         {
             var tokens = await Token.GetAccountTokens(accountSlug);
 
@@ -26,7 +26,7 @@ namespace Notary.Service
             return tokens;
         }
 
-        protected async Task<ApiToken> GenerateToken(ICredentials credentials, Account user)
+        protected async Task<AuthenticatedUser> GenerateToken(ICredentials credentials, Account user)
         {
             DateTime expiration = credentials.Persistant ? DateTime.MaxValue : DateTime.Now.AddHours(2);
             var identity = new ClaimsIdentity(new List<Claim>()
@@ -43,19 +43,23 @@ namespace Notary.Service
 
             var token = Encryption.GenerateJwt(identity, expiration);
 
-            var apiToken = new ApiToken()
+            var authUser = new AuthenticatedUser()
             {
                 AccountSlug = user.Slug,
                 Created = DateTime.UtcNow,
                 CreatedBySlug = user.Slug,
                 Active = true,
+                Login = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Roles,
                 Expiry = expiration,
                 Token = token
             };
 
             //Save the token to the database
-            await Token.SaveAsync(apiToken, user.CreatedBySlug);
-            return apiToken;
+            await Token.SaveAsync(authUser, user.CreatedBySlug);
+            return authUser;
         }
 
         protected ILog Log { get; set; }

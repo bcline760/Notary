@@ -27,7 +27,7 @@ namespace Notary.Service
             Token = tokenRepository;
         }
 
-        public async Task<ApiToken> SignInAsync(ICredentials credentials)
+        public async Task<AuthenticatedUser> SignInAsync(ICredentials credentials)
         {
             return await AuthenticateUsernamePassword(credentials);
         }
@@ -37,7 +37,7 @@ namespace Notary.Service
             throw new NotImplementedException();
         }
 
-        protected async Task<ApiToken> AuthenticateUsernamePassword(ICredentials credentials)
+        protected async Task<AuthenticatedUser> AuthenticateUsernamePassword(ICredentials credentials)
         {
             var user = await Account.GetByEmailAsync(credentials.Key);
 
@@ -52,7 +52,7 @@ namespace Notary.Service
                 return null;
             }
 
-            ApiToken apiToken = await GenerateToken(credentials, user);
+            AuthenticatedUser apiToken = await GenerateToken(credentials, user);
 
             return apiToken;
         }
