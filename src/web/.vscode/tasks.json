@@ -1,0 +1,67 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"label": "Angular build",
+			"isBackground": true,
+			"presentation": {
+				"focus": true,
+				"panel": "dedicated"
+			},
+			"group": "none",
+			"path": ".",
+			"problemMatcher": {
+				"owner": "typescript",
+				"source": "ts",
+				"applyTo": "closedDocuments",
+				"fileLocation": [
+					"relative",
+					"${cwd}"
+				],
+				"pattern": "$tsc",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "(.*?)"
+					},
+					"endsPattern": {
+						"regexp": "Compiled |Failed to compile."
+					}
+				}
+			}
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"label": "Angular serve",
+			"isBackground": true,
+			"presentation": {
+				"focus": true,
+				"panel": "dedicated"
+			},
+			"group": "none",
+			"path": ".",
+			"problemMatcher": {
+				"owner": "typescript",
+				"source": "ts",
+				"applyTo": "closedDocuments",
+				"fileLocation": [
+					"relative",
+					"${cwd}"
+				],
+				"pattern": "$tsc",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "(.*?)"
+					},
+					"endsPattern": {
+						"regexp": "Compiled |Failed to compile."
+					}
+				}
+			}
+		}
+	]
+}

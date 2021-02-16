@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public showFullLayout: boolean = true;
+  public showFullLayout: boolean = false;
   private _routerSub: Subscription | null = null;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {

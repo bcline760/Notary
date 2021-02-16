@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { AuthenticatedUser } from 'src/contract/authenticated-user.contract';
 import { Role } from 'src/contract/role.enum';
 import { SessionService } from './session.service';
@@ -22,14 +22,13 @@ export class AuthGuardService implements CanActivate {
 
         if (this.sessionService.currentAuthenticatedUser &&
           roles.indexOf(this.sessionService.currentAuthenticatedUser.role) === -1) {
-          this.router.navigate(['/']);
-          return false;
+          return this.router.navigate(['/']);
         }
 
         // route has no roles, but user is authenticated, allow them to pass
         return true;
       }
     };
-    return false;
+    return this.router.parseUrl('/session/signin');
   }
 }

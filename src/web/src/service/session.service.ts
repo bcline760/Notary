@@ -14,7 +14,9 @@ export class SessionService {
 
   private tokenSubject: BehaviorSubject<AuthenticatedUser | null>;
 
-  constructor(private httpClient: HttpClient, private jwt: JwtHelperService) { }
+  constructor(private httpClient: HttpClient) {
+    this.tokenSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
+  }
 
   /**
    * Get the current JWT or null if not signed in

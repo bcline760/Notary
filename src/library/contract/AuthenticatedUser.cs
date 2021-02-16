@@ -20,13 +20,13 @@ namespace Notary.Contract
         /// <summary>
         /// The first name of the authenticated user
         /// </summary>
-        [JsonProperty("fName", Required = Required.Always)]
+        [JsonProperty("fName", Required = Required.AllowNull)]
         public string FirstName { get; set; }
 
         /// <summary>
         /// The last name of the authenticated user
         /// </summary>
-        [JsonProperty("lName", Required = Required.Always)]
+        [JsonProperty("lName", Required = Required.AllowNull)]
         public string LastName { get; set; }
 
         /// <summary>
