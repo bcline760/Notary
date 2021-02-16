@@ -1,4 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import "theme/default/theme.scss";
+
+@import "../node_modules/bootstrap/scss/bootstrap.scss"; 
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+a,a:link{
+    color: $shade-darker;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:visited {
+    color: $complementary-a;
+}
+
+.form-control {
+    border: 1px solid $shade-darkest;
+}

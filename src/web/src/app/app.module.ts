@@ -15,7 +15,6 @@ import { CertificatesModule } from './certificates/certificates.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthGuardService } from 'src/service/auth-guard.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { MatCommonModule } from '@angular/material/core';
 
 const providers: Provider[] = [
   SessionService,
@@ -35,7 +34,6 @@ const providers: Provider[] = [
     FontAwesomeModule,
     BrowserAnimationsModule,
     FlexLayoutModule,
-    MatCommonModule,
     HttpClientModule,
     CertificatesModule,
     LayoutModule,
