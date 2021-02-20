@@ -20,3 +20,24 @@ a:visited {
 .form-control {
     border: 1px solid $shade-darkest;
 }
+
+.window {
+  border: 1px solid $window-border;
+  border-radius: 0.5rem;
+  box-shadow: 5px 8px 10px grey;
+}
+
+.window .window-title {
+  font-size: larger;
+  padding: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border-top-left-radius: 0.25rem;
+  font-weight: bold;
+  background-color: $window-bg;
+  color: $window-title-text;
+}
+
+.window .window-body {
+  padding: 0.5rem;
+  border-radius: 1rem;
+}

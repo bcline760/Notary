@@ -4,6 +4,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthenticatedUser } from 'src/contract/authenticated-user.contract';
+import { Credentials } from 'src/contract/credentials.contract';
 import { Role } from 'src/contract/role.enum';
 import { environment } from 'src/environments/environment';
 
@@ -31,7 +32,7 @@ export class SessionService {
    * @param credentials - The credentials to sign in
    * @returns an observable JWT from the API
    */
-  public signIn(credentials: Credential): Observable<AuthenticatedUser> {
+  public signIn(credentials: Credentials): Observable<AuthenticatedUser> {
     const url: string = `${environment.apiUrl}/session/signin`;
     const result: Observable<AuthenticatedUser> = this.httpClient.post<AuthenticatedUser>(url, credentials).pipe(
       map(token => {

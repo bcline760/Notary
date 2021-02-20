@@ -10,27 +10,22 @@ import { SessionModule } from './session/session.module';
 const routes: Routes = [
   {
     path: 'certificates',
-    canActivate: [AuthGuardService],
     loadChildren: () => import('./certificate/certificate.module').then(c => CertificateModule)
   },
   {
     path: 'encryption',
-    canActivate: [AuthGuardService],
     loadChildren: () => import('./encryption/encryption.module').then(e => EncryptionModule)
   },
   {
     path: 'home',
-    canActivate: [AuthGuardService],
     loadChildren: () => import('./home/home.module').then(h => HomeModule)
   },
   {
     path: 'session',
-    canActivate: [AuthGuardService],
     loadChildren: () => import('./session/session.module').then(s => SessionModule)
   },
   {
     path: '',
-    canActivate: [AuthGuardService],
     redirectTo: '/home',
     pathMatch: 'full'
   }
