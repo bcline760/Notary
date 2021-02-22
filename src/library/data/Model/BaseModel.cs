@@ -18,22 +18,22 @@ namespace Notary.Data.Model
         [BsonIgnoreIfDefault,BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         public ObjectId Id { get; set; }
 
-        [BsonElement, BsonRequired]
+        [BsonElement("slug"), BsonRequired]
         public string Slug { get; set; }
 
-        [BsonElement, BsonRequired]
+        [BsonElement("created"), BsonRequired]
         public DateTime Created { get; set; }
 
-        [BsonElement, BsonRequired]
+        [BsonElement("createdBySlug"), BsonRequired]
         public string CreatedBySlug { get; set; }
 
-        [BsonElement]
+        [BsonElement("updated")]
         public DateTime? Updated { get; set; }
 
-        [BsonElement]
+        [BsonElement("updatedBySlug")]
         public string UpdatedBySlug { get; set; }
 
-        [BsonElement, BsonRequired]
+        [BsonElement("active"), BsonRequired]
         public bool Active { get; set; }
     }
 }

@@ -33,7 +33,6 @@ namespace Notary.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -49,8 +48,8 @@ namespace Notary.Api
                     ValidateTokenReplay = HostEnvironment.IsProduction(),
                     ValidateIssuerSigningKey = HostEnvironment.IsProduction(),
                     IssuerSigningKey = new SymmetricSecurityKey(LoadEncryptionKey()),
-                    ValidAudience = config.TokenSettings.Audience,
-                    ValidIssuer = config.TokenSettings.Issuer
+                    ValidAudience = Environment.GetEnvironmentVariable(Constants.TokenAudienceEnvName),
+                    ValidIssuer = Environment.GetEnvironmentVariable(Constants.TokenIssuerEnvName)
                 };
 
                 x.Events = new JwtBearerEvents()
@@ -79,8 +78,49 @@ namespace Notary.Api
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
-            config.Hashing = ConfigureHashing();
+            //Environment.SetEnvironmentVariable('','',EnvironmentVariableTarget.User)
+            var config = new NotaryConfiguration
+            {
+                ApplicationKey = Environment.GetEnvironmentVariable(Constants.ApplicationKeyEnvName),
+                Authentication = (AuthenticationProvider)Enum.Parse(typeof(AuthenticationProvider), Environment.GetEnvironmentVariable(Constants.AuthenticationTypeEnvName)),
+                ConnectionString = Environment.GetEnvironmentVariable(Constants.DatabaseConnectionStringEnvName),
+                DirectorySettings = new DirectorySettings
+                {
+                    AdminGroupName = Environment.GetEnvironmentVariable(Constants.LdapAdminGroupEnvName),
+                    CertificateAdminGroupName = Environment.GetEnvironmentVariable(Constants.LdapCertAdminGroupEnvName),
+                    Domain = Environment.GetEnvironmentVariable(Constants.LdapDomainEnvName),
+                    SearchBase = Environment.GetEnvironmentVariable(Constants.LdapSearchEnvName),
+                    ServerName = Environment.GetEnvironmentVariable(Constants.LdapServerEnvName)
+                },
+                Hashing = ConfigureHashing(),
+                Intermediate = new CertificatePath
+                {
+                    CertificateDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIntermediateCertificateEnvName),
+                    CertificateRequestDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIntermediateRequestEnvName),
+                    PrivateKeyDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIntermediatePrivateKeyEnvName)
+                },
+                Issued = new CertificatePath
+                {
+                    CertificateDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIssuedCertificateEnvName),
+                    CertificateRequestDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIssuedRequestEnvName),
+                    PrivateKeyDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryIssuedPrivateKeyEnvName)
+                },
+                Root = new CertificatePath
+                {
+                    CertificateDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryRootCertificateEnvName),
+                    CertificateRequestDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryRootRequestEnvName),
+                    PrivateKeyDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryRootPrivateKeyEnvName)
+                },
+                RootDirectory = Environment.GetEnvironmentVariable(Constants.DirectoryCaRootEnvName),
+                ServiceAccountPassword = Environment.GetEnvironmentVariable(Constants.ServiceAccountPassEnvName),
+                ServiceAccountUser = Environment.GetEnvironmentVariable(Constants.ServiceAccountUserEnvName),
+                TokenSettings = new TokenSettings
+                {
+                    Audience = Environment.GetEnvironmentVariable(Constants.TokenAudienceEnvName),
+                    Issuer = Environment.GetEnvironmentVariable(Constants.TokenIssuerEnvName)
+                },
+                UserKeyPath = Environment.GetEnvironmentVariable(Constants.DirectoryUserKeyEnvName)
+            };
 
             builder.RegisterInstance(config).SingleInstance();
 
@@ -179,7 +219,6 @@ namespace Notary.Api
 
             return encryptionKey;
         }
-
 
         public IConfiguration Configuration { get; }
 

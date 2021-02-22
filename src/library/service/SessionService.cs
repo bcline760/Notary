@@ -28,7 +28,7 @@ namespace Notary.Service
 
         protected async Task<AuthenticatedUser> GenerateToken(ICredentials credentials, Account user)
         {
-            DateTime expiration = credentials.Persistant ? DateTime.MaxValue : DateTime.Now.AddHours(2);
+            DateTime expiration = credentials.Persistant ? DateTime.MaxValue : DateTime.UtcNow.AddHours(2);
             var identity = new ClaimsIdentity(new List<Claim>()
             {
                 new Claim(ClaimTypes.Email,user.Email),

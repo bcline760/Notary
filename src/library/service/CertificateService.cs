@@ -83,8 +83,8 @@ namespace Notary.Service
 
                 var thumbprint = GetThumbprint(generatedCertificate);
 
-                var issuedKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{thumbprint}.key.pem";
-                var issuedCertPath = $"{Configuration.Issued.CertificateDirectory}/{thumbprint}.cer";
+                var issuedKeyPath = $"{Configuration.RootDirectory}/{Configuration.Issued.PrivateKeyDirectory}/{thumbprint}.key.pem";
+                var issuedCertPath = $"{Configuration.RootDirectory}/{Configuration.Issued.CertificateDirectory}/{thumbprint}.cer";
 
                 //Save encrypted private key and certificate to the file system
                 EncryptionService.SavePrivateKey(certificateKeyPair, issuedKeyPath, random);
@@ -123,7 +123,7 @@ namespace Notary.Service
 
             byte[] certificateBinary = null;
 
-            var certPath = $"{Configuration.Issued.CertificateDirectory}/{certificate.Thumbprint}.cer";
+            var certPath = $"{Configuration.RootDirectory}/{Configuration.Issued.CertificateDirectory}/{certificate.Thumbprint}.cer";
             X509Certificate cert = await LoadCertificate(certPath);
             if (cert == null)
                 return null;
@@ -135,7 +135,7 @@ namespace Notary.Service
                 case CertificateFormat.Pem:
                     break;
                 case CertificateFormat.Pkcs12:
-                    var certKeyPath = $"{Configuration.Issued.PrivateKeyDirectory}/{certificate.Thumbprint}.key.pem";
+                    var certKeyPath = $"{Configuration.RootDirectory}/{Configuration.Issued.PrivateKeyDirectory}/{certificate.Thumbprint}.key.pem";
                     var certKey = EncryptionService.LoadKeyPair(certKeyPath, Configuration.ApplicationKey);
                     var store = new Pkcs12StoreBuilder().Build();
                     var certEntry = new X509CertificateEntry(cert);
@@ -280,13 +280,13 @@ namespace Notary.Service
 
                 await SaveAsync(intermediateCertificateData, intermediate.RequestedBySlug);
 
-                string rootPkPath = $"{Configuration.Root.PrivateKeyDirectory}/{rootCertificateData.Thumbprint}.key.pem";
+                string rootPkPath = $"{Configuration.RootDirectory}/{Configuration.Root.PrivateKeyDirectory}/{rootCertificateData.Thumbprint}.key.pem";
                 string intermediatePkPath = $"{Configuration.Intermediate.PrivateKeyDirectory}/{intermediateCertificateData.Thumbprint}.key.pem";
                 EncryptionService.SavePrivateKey(rootKeyPair, rootPkPath, randomRoot);
                 EncryptionService.SavePrivateKey(intermediateKeyPair, intermediatePkPath, intermediateRandom);
 
-                string rootCertPath = $"{Configuration.Root.CertificateDirectory}/{rootCertificateData.Thumbprint}.cer";
-                string intermediateCertPath = $"{Configuration.Intermediate.CertificateDirectory}/{intermediateCertificateData.Thumbprint}.cer";
+                string rootCertPath = $"{Configuration.RootDirectory}/{Configuration.Root.CertificateDirectory}/{rootCertificateData.Thumbprint}.cer";
+                string intermediateCertPath = $"{Configuration.RootDirectory}/{Configuration.Intermediate.CertificateDirectory}/{intermediateCertificateData.Thumbprint}.cer";
                 SaveCertificate(rootCertificate, rootCertPath);
                 SaveCertificate(intermediateCertificate, intermediateCertPath);
             }

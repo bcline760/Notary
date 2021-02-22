@@ -74,6 +74,7 @@ namespace Notary.Service
                     };
 
                     await Account.RegisterAccountAsync(newAccount);
+                    account = newAccount;
                 }
                 AuthenticatedUser token = await GenerateToken(credentials, account);
                 return token;

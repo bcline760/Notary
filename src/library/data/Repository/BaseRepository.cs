@@ -133,7 +133,7 @@ namespace Notary.Data.Repository
         protected async Task<TC> RunQuery(FilterDefinition<TM> filter)
         {
             var result = await Collection.FindAsync(filter);
-            var doc = await result.FirstAsync();
+            var doc = await result.FirstOrDefaultAsync();
             var map = Mapper.Map<TC>(doc);
             return map;
         }

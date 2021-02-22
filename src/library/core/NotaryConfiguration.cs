@@ -41,6 +41,12 @@ namespace Notary
         /// </summary>
         public CertificatePath Root { get; set; }
 
+        public string RootDirectory { get; set; }
+
+        public string ServiceAccountPassword { get; set; }
+
+        public string ServiceAccountUser { get; set; }
+
         public TokenSettings TokenSettings { get; set; }
 
         public string UserKeyPath { get; set; }
@@ -66,10 +72,6 @@ namespace Notary
         public string SearchBase { get; set; }
 
         public string ServerName { get; set; }
-
-        public string ServiceAccountPassword { get; set; }
-
-        public string ServiceAccountUser { get; set; }
     }
 
     public class Hashing

@@ -64,12 +64,12 @@ namespace Notary.Service
                     account.PublicKey = sw.ToString();
                 }
 
-                await SaveAsync(account, null);
-
                 //Generate the account's keys
-                string path = $"{Configuration.UserKeyPath}/{account.Slug}.key.pem";
+                string path = $"{Configuration.RootDirectory}/{Configuration.UserKeyPath}/{account.Slug}.key.pem";
                 var random = EncService.GetSecureRandom();
                 EncService.SavePrivateKey(keyPair, path, random);
+
+                await SaveAsync(account, null);
             }
             catch (CryptographicException cex)
             {
