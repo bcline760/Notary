@@ -86,18 +86,13 @@ namespace Notary.Service
             }
         }
 
-        public async Task SignoutAsync(string accountSlug)
-        {
-            var activeTokens = await Token.GetAccountTokens(accountSlug);
-        }
-
         private Roles GetRole(string[] memberOf)
         {
             foreach (var group in memberOf)
             {
-                if (group == Configuration.DirectorySettings.AdminGroupName)
+                if (group.Contains(Configuration.DirectorySettings.AdminGroupName))
                     return Roles.Admin;
-                else if (group == Configuration.DirectorySettings.CertificateAdminGroupName)
+                else if (group.Contains(Configuration.DirectorySettings.CertificateAdminGroupName)) ;
                     return Roles.CertificateAdmin;
             }
 

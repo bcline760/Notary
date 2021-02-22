@@ -25,10 +25,8 @@ namespace Notary.Data.Repository
             var result = await Collection.FindAsync(filter);
 
             List<AuthenticatedUser> tokens = new List<AuthenticatedUser>();
-            if (result.Any())
-            {
-                tokens.AddRange(result.ToList().Select(Mapper.Map<AuthenticatedUser>));
-            }
+            tokens.AddRange(result.ToList().Select(Mapper.Map<AuthenticatedUser>));
+
             return tokens;
         }
     }

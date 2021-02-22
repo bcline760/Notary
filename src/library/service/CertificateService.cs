@@ -186,27 +186,27 @@ namespace Notary.Service
             }
         }
 
-        public async Task GenerateCaCertificates(CertificateRequest root, CertificateRequest intermediate)
+        public async Task GenerateCaCertificates(CertificateAuthoritySetup setup)
         {
             var randomRoot = EncryptionService.GetSecureRandom();
             var snRoot = EncryptionService.GenerateSerialNumber(randomRoot);
-            var rootKeyPair = EncryptionService.GenerateKeyPair(randomRoot, 2048);
+            var rootKeyPair = EncryptionService.GenerateKeyPair(randomRoot, setup.KeyLength);
 
             var intermediateRandom = EncryptionService.GetSecureRandom();
             var snIntermediate = EncryptionService.GenerateSerialNumber(intermediateRandom);
-            var intermediateKeyPair = EncryptionService.GenerateKeyPair(intermediateRandom, 2048);
+            var intermediateKeyPair = EncryptionService.GenerateKeyPair(intermediateRandom, setup.KeyLength);
 
             X509Certificate rootCertificate = null, intermediateCertificate = null;
             try
             {
                 rootCertificate = GenerateCertificate(
-                    root.SubjectAlternativeNames,
+                    new List<SubjectAlternativeName>(),
                     randomRoot,
-                    DistinguishedName.BuildDistinguishedName(root.Subject),
+                    DistinguishedName.BuildDistinguishedName(setup.RootDn),
                     rootKeyPair,
                     snRoot,
-                    DistinguishedName.BuildDistinguishedName(root.Subject), //Root certs self signed
-                    DateTime.UtcNow.AddHours(root.LengthInHours),
+                    DistinguishedName.BuildDistinguishedName(setup.RootDn), //Root certs self signed
+                    DateTime.UtcNow.AddYears(setup.LengthInYears),
                     rootKeyPair, //Root certs, self signed
                     snRoot,
                     true,
@@ -222,29 +222,29 @@ namespace Notary.Service
                     Active = true,
                     Algorithm = Algorithm.RSA,
                     Created = DateTime.Now,
-                    Issuer = root.Subject,
-                    SubjectAlternativeNames = root.SubjectAlternativeNames,
-                    Subject = root.Subject,
+                    Issuer = setup.RootDn,
+                    SubjectAlternativeNames = new List<SubjectAlternativeName>(),
+                    Subject = setup.RootDn,
                     KeyUsage = (int)KeyUsageFlags.CodeSigning,
-                    NotAfter = DateTime.UtcNow.AddHours(root.LengthInHours),
+                    NotAfter = DateTime.UtcNow.AddYears(setup.LengthInYears),
                     NotBefore = DateTime.UtcNow,
-                    CreatedBySlug = root.RequestedBySlug,
+                    CreatedBySlug = setup.Requestor,
                     PrimarySigningCertificate = false,
                     SerialNumber = rootCertificate.SerialNumber.ToString(16),
                     Thumbprint = rootThumb
                 };
 
                 //Persist the certificate to the data store.
-                await SaveAsync(rootCertificateData, "root");
+                await SaveAsync(rootCertificateData, setup.Requestor);
 
                 intermediateCertificate = GenerateCertificate(
-                    intermediate.SubjectAlternativeNames,
+                    new List<SubjectAlternativeName>(),
                     intermediateRandom,
-                    DistinguishedName.BuildDistinguishedName(intermediate.Subject),
+                    DistinguishedName.BuildDistinguishedName(setup.IntermediateDn),
                     intermediateKeyPair,
                     snIntermediate,
-                    DistinguishedName.BuildDistinguishedName(root.Subject),
-                    DateTime.UtcNow.AddHours(intermediate.LengthInHours),
+                    DistinguishedName.BuildDistinguishedName(setup.RootDn),
+                    DateTime.UtcNow.AddYears(setup.LengthInYears),
                     rootKeyPair,
                     snRoot,
                     true,
@@ -265,23 +265,23 @@ namespace Notary.Service
                     Active = true,
                     Algorithm = Algorithm.RSA,
                     Created = DateTime.Now,
-                    Issuer = root.Subject,
-                    SubjectAlternativeNames = intermediate.SubjectAlternativeNames,
-                    Subject = intermediate.Subject,
+                    Issuer = setup.RootDn,
+                    SubjectAlternativeNames = new List<SubjectAlternativeName>(),
+                    Subject = setup.IntermediateDn,
                     KeyUsage = (int)KeyUsageFlags.CodeSigning,
-                    NotAfter = DateTime.UtcNow.AddHours(intermediate.LengthInHours),
+                    NotAfter = DateTime.UtcNow.AddYears(setup.LengthInYears),
                     NotBefore = DateTime.UtcNow,
                     SigningCertificateSlug = rootCertificateData.Slug,
-                    CreatedBySlug = intermediate.RequestedBySlug,
+                    CreatedBySlug = setup.Requestor,
                     PrimarySigningCertificate = true,
                     SerialNumber = intermediateCertificate.SerialNumber.ToString(),
                     Thumbprint = interThumb
                 };
 
-                await SaveAsync(intermediateCertificateData, intermediate.RequestedBySlug);
+                await SaveAsync(intermediateCertificateData, setup.Requestor);
 
                 string rootPkPath = $"{Configuration.RootDirectory}/{Configuration.Root.PrivateKeyDirectory}/{rootCertificateData.Thumbprint}.key.pem";
-                string intermediatePkPath = $"{Configuration.Intermediate.PrivateKeyDirectory}/{intermediateCertificateData.Thumbprint}.key.pem";
+                string intermediatePkPath = $"{Configuration.RootDirectory}/{Configuration.Intermediate.PrivateKeyDirectory}/{intermediateCertificateData.Thumbprint}.key.pem";
                 EncryptionService.SavePrivateKey(rootKeyPair, rootPkPath, randomRoot);
                 EncryptionService.SavePrivateKey(intermediateKeyPair, intermediatePkPath, intermediateRandom);
 
@@ -290,7 +290,7 @@ namespace Notary.Service
                 SaveCertificate(rootCertificate, rootCertPath);
                 SaveCertificate(intermediateCertificate, intermediateCertPath);
             }
-            catch (CryptoException cex)
+            catch (Exception cex)
             {
                 throw cex.IfNotLoggedThenLog(Logger);
             }

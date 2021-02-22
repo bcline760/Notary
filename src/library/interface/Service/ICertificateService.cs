@@ -50,6 +50,6 @@ namespace Notary.Interface.Service
         /// </summary>
         /// <param name="root"></param>
         /// <param name="intermediate"></param>
-        Task GenerateCaCertificates(CertificateRequest root, CertificateRequest intermediate);
+        Task GenerateCaCertificates(CertificateAuthoritySetup setup);
     }
 }

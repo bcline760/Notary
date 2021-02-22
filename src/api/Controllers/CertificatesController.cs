@@ -18,6 +18,16 @@ namespace Notary.Api.Controllers
         {
         }
 
+        [HttpPost, Route("setup"), Authorize(Roles="Admin")]
+        public async Task<IActionResult> SetupCertificateAuthority([FromBody] CertificateAuthoritySetup request)
+        {
+            var slugClaim = User.Claims.First(c => c.Type == "slug");
+
+            var service = (ICertificateService)Service;
+            await service.GenerateCaCertificates(request);
+            return Ok();
+        }
+
         [HttpPost, Route("{slug}/download"), Authorize(Roles = "Admin,CertificateAdmin,User")]
         public async Task<IActionResult> DownloadCertificateAsync(string slug, CertificateFormat format, string pwd = null)
         {

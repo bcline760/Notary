@@ -15,10 +15,7 @@ namespace Notary.Contract
         [JsonProperty("algorithm", Required = Required.Always)]
         public Algorithm Algorithm
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         /// <summary>
@@ -27,10 +24,7 @@ namespace Notary.Contract
         [JsonProperty("issuer", Required = Required.Always)]
         public DistinguishedName Issuer
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         [JsonProperty("keuUsage", Required = Required.Always)]
@@ -51,10 +45,7 @@ namespace Notary.Contract
         [JsonProperty("notBefore", Required = Required.Always)]
         public DateTime NotBefore
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         /// <summary>
@@ -63,10 +54,7 @@ namespace Notary.Contract
         [JsonProperty("notAfter", Required = Required.Always)]
         public DateTime NotAfter
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         /// <summary>
@@ -75,19 +63,13 @@ namespace Notary.Contract
         [JsonProperty("revokeDate", Required = Required.Always)]
         public DateTime? RevocationDate
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         [JsonProperty("sn", Required = Required.Always)]
         public string SerialNumber
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         /// <summary>
@@ -102,19 +84,13 @@ namespace Notary.Contract
         [JsonProperty("sanList", Required = Required.AllowNull)]
         public List<SubjectAlternativeName> SubjectAlternativeNames
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         [JsonProperty("thumbprint", Required = Required.Always)]
         public string Thumbprint
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
 

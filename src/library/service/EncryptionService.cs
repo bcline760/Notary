@@ -39,7 +39,7 @@ namespace Notary.Service
 
         public byte[] Decrypt(byte[] encryptedData, string accountSlug)
         {
-            string path = $"{_config.UserKeyPath}/{accountSlug}.key.pem";
+            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
 
             var keyPair = LoadKeyPair(path, _config.ApplicationKey);
             var decryptEngine = new Pkcs1Encoding(new RsaEngine());
@@ -51,7 +51,7 @@ namespace Notary.Service
 
         public byte[] Encrypt(byte[] data, string accountSlug)
         {
-            string path = $"{_config.UserKeyPath}/{accountSlug}.key.pem";
+            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
 
             var keyPair = LoadKeyPair(path, _config.ApplicationKey);
             var encryptEngine = new Pkcs1Encoding(new RsaEngine());

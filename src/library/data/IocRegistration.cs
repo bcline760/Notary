@@ -29,6 +29,8 @@ namespace Notary.Data
                     cfg.CreateMap<AuthenticatedUser, TokenModel>().ReverseMap();
                     cfg.CreateMap<RevocatedCertificate, RevocatedCertificateModel>().ReverseMap();
                     cfg.CreateMap<Address, AddressModel>().ReverseMap();
+                    cfg.CreateMap<DistinguishedName, DistinguishedNameModel>().ReverseMap();
+                    cfg.CreateMap<SubjectAlternativeName, SanModel>().ReverseMap();
                 });
 
                 var map = mapConfig.CreateMapper();

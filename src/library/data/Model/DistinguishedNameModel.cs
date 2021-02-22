@@ -10,57 +10,39 @@ namespace Notary.Data.Model
     public class DistinguishedNameModel
     {
         [BsonElement("CN"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
-        public int CommonName
+        public string CommonName
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [BsonElement("C"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
         public string Country
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [BsonElement("L"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
         public string Locale
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [BsonElement("O"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
-        public int Organization
+        public string Organization
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [BsonElement("OU"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
         public string OrganizationalUnit
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
 
         [BsonElement("S"), BsonIgnoreIfDefault, BsonIgnoreIfNull]
-        public int StateProvince
+        public string StateProvince
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
     }
 }

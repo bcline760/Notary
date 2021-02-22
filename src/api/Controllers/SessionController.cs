@@ -49,7 +49,7 @@ namespace Notary.Api.Controllers
                 return await ExecuteServiceMethod(sessionService.SignoutAsync, slug, HttpStatusCode.OK);
             }
 
-            return NoContent();
+            return LocalRedirectPermanent("session/signin");
         }
 
         private readonly ISessionService sessionService;

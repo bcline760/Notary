@@ -62,6 +62,20 @@ namespace Notary.Service
             return authUser;
         }
 
+        public async Task SignoutAsync(string accountSlug)
+        {
+            var tokens = await Token.GetAccountTokens(accountSlug);
+
+            if (tokens.Any())
+            {
+                var activeTokens = tokens.Where(a => a.Active).Select(a => a).ToList();
+                foreach (var token in activeTokens)
+                {
+                    await Token.DeleteAsync(token.Slug, accountSlug);
+                }
+            }
+        }
+
         protected ILog Log { get; set; }
 
         protected IAccountService Account { get; set; }
