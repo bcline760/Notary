@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, Provider } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -21,12 +21,30 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { SessionModule } from './session/session.module';
 import { HomeModule } from './home/home.module';
 import { HomeComponent } from './home/home.component';
+import { LoadingInterceptor } from 'src/intercept/loading.interceptor';
+import { ErrorInterceptor } from 'src/intercept/error.interceptor';
+import { JwtInterceptor } from 'src/intercept/jwt.interceptor';
 
 const providers: Provider[] = [
   SessionService,
   TokenService,
   CertificateService,
-  AuthGuardService
+  AuthGuardService,
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: LoadingInterceptor,
+    multi: true
+  },
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: ErrorInterceptor,
+    multi: true
+  },
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: JwtInterceptor,
+    multi: true
+  }
 ]
 
 @NgModule({
@@ -41,6 +59,7 @@ const providers: Provider[] = [
     BrowserAnimationsModule,
     FlexLayoutModule,
     HttpClientModule,
+    LayoutModule,
     CertificateModule,
     EncryptionModule,
     SessionModule,
@@ -48,7 +67,6 @@ const providers: Provider[] = [
     EncryptionModule,
     AppRoutingModule
   ],
-  providers: providers,
   bootstrap: [AppComponent],
   entryComponents: [HomeComponent]
 })
