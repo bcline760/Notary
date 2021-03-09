@@ -1,9 +1,42 @@
-<nav class="navbar navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" [routerLink]="['/']">
+        <img src="../../../assets/notary-bw-lg.png" width="53" height="30">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="certificate-ddml" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Certificates
+                </a>
+                <div class="dropdown-menu" aria-labelledby="certificate-ddml">
+                    <a class="dropdown-item" [routerLink]="['/certificates']">List</a>
+                    <a class="dropdown-item" [routerLink]="['/certificates/issure']">Issue</a>
+                    <a class="dropdown-item" [routerLink]="['/certificates/authority']">Certificate Authority</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="encryption-ddml" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Encryption
+                </a>
+                <div class="dropdown-menu" aria-labelledby="encryption-ddml">
+                    <a class="dropdown-item" [routerLink]="['/encryption/encrypt']">Encrypt</a>
+                    <a class="dropdown-item" [routerLink]="['/encryption/decrypt']">Decrypt</a>
+                    <a class="dropdown-item" [routerLink]="['/encryption/hash']">Hash</a>
+                    <a class="dropdown-item" [routerLink]="['/encryption/sign']">Sign</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+  </nav>
+<!-- <nav class="navbar navbar-dark bg-primary">
     <a class="navbar-brand" [routerLink]="['/']">
         <img src="../../../assets/notary-primary-lg.png" width="53" height="30">
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" aria-label="Toggle Navigation"
-        data-target="#navigationMenu" aria-controls="navigationMenu" aria-expanded="false">
+        data-target="#navigationMenu" aria-controls="navigationMenu" aria-expanded="true">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navigationMenu">
@@ -31,4 +64,4 @@
             </li>
         </ul>
     </div>
-</nav>
+</nav> -->

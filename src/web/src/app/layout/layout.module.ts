@@ -4,6 +4,7 @@ import { HeaderComponent } from './header/header.component';
 import { RouterModule } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 import { LoadingComponent } from './loading/loading.component';
+import { LoadingService } from 'src/service/loading.service';
 
 
 @NgModule({
@@ -14,7 +15,9 @@ import { LoadingComponent } from './loading/loading.component';
     RouterModule
   ],
   exports: [
-    HeaderComponent
-  ]
+    HeaderComponent,
+    LoadingComponent
+  ],
+  providers: [LoadingService]
 })
 export class LayoutModule { }

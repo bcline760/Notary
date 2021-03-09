@@ -76,6 +76,9 @@ namespace Notary.Service
                     await Account.RegisterAccountAsync(newAccount);
                     account = newAccount;
                 }
+
+                //Sign out any orphaned tokens.
+                await SignoutAsync(account.Slug);
                 AuthenticatedUser token = await GenerateToken(credentials, account);
                 return token;
             }

@@ -24,11 +24,10 @@ export class AuthGuardService implements CanActivate {
           roles.indexOf(this.sessionService.currentAuthenticatedUser.role) === -1) {
           return this.router.navigate(['/']);
         }
-
-        // route has no roles, but user is authenticated, allow them to pass
-        return true;
       }
-    };
+      // route has no roles, but user is authenticated, allow them to pass
+      return true;
+    }
     return this.router.parseUrl('/session/signin');
   }
 }

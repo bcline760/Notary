@@ -19,7 +19,7 @@ export class LoadingInterceptor implements HttpInterceptor {
 
   constructor(private loadingSvc: LoadingService) { }
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let displayLoading: boolean = true;
     for (const url of this._skipUrls) {
       if (new RegExp(url).test(request.url)) {
@@ -33,14 +33,18 @@ export class LoadingInterceptor implements HttpInterceptor {
         this.loadingSvc.startLoading();
       }
       this._activeRequests++;
+
+
+      return next.handle(request).pipe(
+        finalize(() => {
+          this._activeRequests--;
+          if (this._activeRequests === 0) {
+            this.loadingSvc.stopLoading();
+          }
+        })
+      );
+    } else {
+      return next.handle(request);
     }
-    return next.handle(request).pipe(
-      finalize(() => {
-        this._activeRequests--;
-        if (this._activeRequests === 0) {
-          this.loadingSvc.stopLoading();
-        }
-      })
-    )
   }
 }

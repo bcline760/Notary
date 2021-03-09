@@ -13,17 +13,23 @@ import { environment } from 'src/environments/environment';
 })
 export class SessionService {
 
-  private tokenSubject: BehaviorSubject<AuthenticatedUser | null>;
-
   constructor(private httpClient: HttpClient) {
-    this.tokenSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
+    // this.tokenSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
   }
 
   /**
    * Get the current JWT or null if not signed in
    */
   public get currentAuthenticatedUser(): AuthenticatedUser | null {
-    return this.tokenSubject.value;
+    // return this.tokenSubject.value;
+    if (sessionStorage.length > 0) {
+      const json: string | null = sessionStorage.getItem("auth_user");
+      if (json) {
+        return JSON.parse(json) as AuthenticatedUser;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -36,7 +42,7 @@ export class SessionService {
     const url: string = `${environment.apiUrl}/session/signin`;
     const result: Observable<AuthenticatedUser> = this.httpClient.post<AuthenticatedUser>(url, credentials).pipe(
       map(token => {
-        this.tokenSubject.next(token);
+        sessionStorage.setItem("auth_user", JSON.stringify(token));
         return token;
       })
     );
@@ -48,7 +54,7 @@ export class SessionService {
    * Perform user signout and destroy current JWT
    */
   public signOut() {
-    this.tokenSubject.next(null);
+    sessionStorage.clear();
     const url: string = `${environment.apiUrl}/session/signout`;
 
     if (this.currentAuthenticatedUser) {
@@ -66,7 +72,7 @@ export class SessionService {
 
     if (token) {
       const now: Date = new Date();
-      return token.expiry > now;
+      return new Date(token.expiry) > now;
     }
 
     return false;

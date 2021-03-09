@@ -74,6 +74,25 @@ namespace Notary.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Notary.Api", Version = "v1" });
             });
+
+            if (HostEnvironment.IsDevelopment())
+            {
+                services.AddCors(o =>
+                {
+                    o.AddPolicy("CorsPolicy", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                });
+            }
+            if (HostEnvironment.IsProduction())
+            {
+                string origins = Environment.GetEnvironmentVariable("");
+                if (string.IsNullOrEmpty(origins))
+                    throw new InvalidOperationException("Please set environment variable ");
+
+                services.AddCors(o =>
+                {
+                    o.AddPolicy("CorsPolicy", b => b.AllowAnyMethod().AllowAnyHeader().WithOrigins(origins.Split(',')));
+                });
+            }
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -144,7 +163,7 @@ namespace Notary.Api
 
             app.UseAuthorization();
 
-            app.UseCors();
+            app.UseCors("CorsPolicy");
 
             app.UseEndpoints(endpoints =>
             {

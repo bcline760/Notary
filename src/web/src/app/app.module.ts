@@ -68,6 +68,7 @@ const providers: Provider[] = [
     AppRoutingModule
   ],
   bootstrap: [AppComponent],
-  entryComponents: [HomeComponent]
+  entryComponents: [HomeComponent],
+  providers: providers
 })
 export class AppModule { }
