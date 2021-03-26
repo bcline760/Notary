@@ -17,7 +17,7 @@ namespace Notary.Data.Model
         [BsonElement("fname"), BsonRequired]
         public string FirstName { get; set; }
 
-        [BsonElement("lanme"), BsonRequired]
+        [BsonElement("lname"), BsonRequired]
         public string LastName { get; set; }
 
         [BsonElement("password"), BsonRequired]

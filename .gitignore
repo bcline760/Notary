@@ -354,3 +354,4 @@ MigrationBackup/
 **/appsettings.Development.json
 **/*.cer
 **/*.pfx
+**/*.key

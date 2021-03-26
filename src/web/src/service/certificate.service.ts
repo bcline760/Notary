@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Certificate } from 'src/contract/certificate.contract';
 import { CertificateFormat } from 'src/contract/certificate-format.enum';
-import { url } from 'inspector';
 
 @Injectable({
   providedIn: 'root'
