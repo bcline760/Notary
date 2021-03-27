@@ -1,0 +1,33 @@
+<div class="modal message-box" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{title}}</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h3 *ngIf="icon == 'Info'" class="text-info"><i class="fas fa-info-circle"></i></h3>
+                        <h3 *ngIf="icon=='Question'"><i class="fas fa-question-circle"></i></h3>
+                        <h3 *ngIf="icon=='Warning'" class="text-warning"><i class="fas fa-exclamation-triangle"></i>
+                        </h3>
+                        <h3 *ngIf="icon=='Error'" class="text-danger"><i class="fas fa-bomb"></i></h3>
+                    </div>
+                    <div class="col">
+                        {{message}}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" *ngIf="buttons=='OK' || buttons=='OKCancel'"
+                    id="modalButtonOk">OK</button>
+                <button type="button" class="btn btn-primary" *ngIf="buttons=='YesNo' || buttons=='YesNoCancel'"
+                    id="modalButtonYes">Yes</button>
+                <button type="button" class="btn btn-secondary" *ngIf="buttons=='YesNo' || buttons=='YesNoCancel'"
+                    id="modalButtonNo">No</button>
+                <button type="button" class="btn btn-secondary" *ngIf="buttons=='OKCancel' || buttons=='YesNoCancel'"
+                    id="modalButtonCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

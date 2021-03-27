@@ -1,0 +1,13 @@
+@import "../../../theme/default/theme.scss";
+
+.menu {
+    background-color: $shade-darkest;
+    color: #FFF;
+}
+
+.menu-item {
+    margin-top: 2rem;
+    width: 95%;
+    border: 1px $complementary-b;
+    border-radius: 2rem;
+}

@@ -1,12 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { EncryptionRoutingModule } from './encryption-routing.module';
+import { EncryptionComponent } from './encryption.component';
 
 
 @NgModule({
-  declarations: [],
+  declarations: [EncryptionComponent],
   imports: [
-    CommonModule
+    CommonModule,
+    EncryptionRoutingModule
   ]
 })
 export class EncryptionModule { }
