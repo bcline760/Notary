@@ -1,17 +1,25 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { SessionComponent } from './session.component';
 import { SigninComponent } from './signin/signin.component';
 import { SignoutComponent } from './signout/signout.component';
 
 
 const routes: Routes = [
   {
-    path: 'signin',
-    component: SigninComponent
-  },
-  {
-    path: 'signout',
-    component: SignoutComponent
+    path: 'session',
+    component: SessionComponent,
+    data: { showFullLayout: false },
+    children: [
+      {
+        path: 'signin',
+        component: SigninComponent
+      },
+      {
+        path: 'signout',
+        component: SignoutComponent
+      }
+    ]
   }
 ];
 

@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 
 import { CertificatesRoutingModule } from './certificates-routing.module';
 import { CertificatesComponent } from './certificates.component';
+import { CertificateListComponent } from './certificate-list/certificate-list.component';
 import { CertificateDetailComponent } from './certificate-detail/certificate-detail.component';
-import { NotaryModule } from '../notary/notary.module';
 
 
 @NgModule({
-  declarations: [CertificatesComponent, CertificateDetailComponent],
+  declarations: [CertificatesComponent, CertificateListComponent, CertificateDetailComponent],
   imports: [
-    NotaryModule,
+    CommonModule,
     CertificatesRoutingModule
   ]
 })

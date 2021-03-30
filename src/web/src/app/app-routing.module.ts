@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AuthGuardService } from 'src/service/auth-guard.service';
-import { HomeModule } from './home/home.module';
 import { SessionModule } from './session/session.module';
-
 
 const routes: Routes = [
   {
@@ -18,13 +15,11 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then(h => HomeModule),
-    data: { showFullLayout: true }
+    loadChildren: () => import('./home/home.module').then(h => h.HomeModule)
   },
   {
     path: 'session',
-    loadChildren: () => import('./session/session.module').then(s => SessionModule),
-    data: { showFullLayout: false }
+    loadChildren: () => import('./session/session.module').then(s => SessionModule)
   },
   {
     path: '',

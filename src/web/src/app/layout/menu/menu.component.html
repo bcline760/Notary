@@ -7,34 +7,19 @@
                     <img src="../../../assets/notary-primary-lg.png">
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
+            <div class="row mt-2">
+                <div class="col text-center">
                     <a [routerLink]="['/session/signout']"><i class="fas fa-sign-out"></i>&nbsp;Sign Out</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row menu-option">
-        <div class="col">
-            <a [routerLink]="['/certificates']"><i class="far fa-file-certificate"></i>&nbsp;Certificates</a>
-        </div>
-    </div>
-    <div class="row menu-option">
-        <!--keys-->
-        <div class="col">
-            <a [routerLink]="['/keys']"><i class="far fa-key"></i>&nbsp;Keys</a>
-        </div>
-    </div>
-    <div class="row menu-option">
-        <!--encryption-->
-        <div class="col">
-            <a [routerLink]="['/encryption']"><i class="fad fa-user-secret"></i>&nbsp; Encryption</a>
-        </div>
-    </div>
-    <div class="row menu-option">
-        <!--settings-->
-        <div class="col">
-            <a [routerLink]="['/settings']"><i class="fad fa-cogs"></i>&nbsp; Settings</a>
-        </div>
-    </div>
+    <a routerLink="/certificates" routerLinkActive="active-menu" class="menu-option"><i
+            class="far fa-file-certificate"></i>&nbsp;Certificates</a>
+    <a routerLink="/encryption" routerLinkActive="active-menu" class="menu-option"><i
+            class="fad fa-user-secret"></i>&nbsp;
+        Encryption</a>
+    <a routerLink="/keys" routerLinkActive="active-menu" class="menu-option"><i class="far fa-key"></i>&nbsp;Keys</a>
+    <a routerLink="/settings" routerLinkActive="active-menu" class="menu-option"><i class="fad fa-cogs"></i>&nbsp;
+        Settings</a>
 </div>

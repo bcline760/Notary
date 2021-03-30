@@ -3,26 +3,35 @@
         &nbsp;
     </div>
     <div class="window-body">
-        <form #logonform="ngForm" (ngSubmit)="onSubmit()">
+        <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
             <div class="form-group">
-                <input *ngIf="model !== null" type="text" id="username" name="username" #username="ngModel"
-                    [(ngModel)]="model.username" class="form-control" placeholder="username">
+                <input type="text" id="username" formControlName="username" class="form-control" placeholder="username"
+                    required>
                 <small id="usernameHelp" class="text-muted form-text">Please enter a username</small>
+                <div *ngIf="username != null && username.invalid && (username.dirty || username.touched)"
+                    class="alert alert-danger">
+                    This value is required
+                </div>
             </div>
             <div class="form-group">
-                <input *ngIf="model !== null" type="password" id="password" name="password" #password="ngModel"
-                    [(ngModel)]="model.password" class="form-control" placeholder="password">
+                <input type="password" id="password" name="password" formControlName="password" class="form-control"
+                    placeholder="password" required>
                 <small id="passwordHelp" class="text-muted form-text">Please enter a password</small>
+                <div class="alert alert-danger"
+                    *ngIf="password != null && password.invalid && (password.dirty || password.touched)">A password is
+                    required</div>
             </div>
             <div class="form-check">
-                <input *ngIf="model !== null" type="checkbox" id="persist" name="persist" #persist="ngModel"
-                    [(ngModel)]="model.persist" class="form-check-input">
+                <input type="checkbox" id="persist" name="persist" formControlName="persist" class="form-check-input">
                 <label class="form-check-label" for="persist">Keep me signed in</label>
             </div>
             <div class="border-bottom border-secondary">&nbsp;</div>
             <div class="mt-2 text-center">
                 <input type="submit" value="Sign In" class="btn btn-primary">&nbsp;
                 <input type="reset" value="Do over" class="btn btn-secondary">
+            </div>
+            <div class="alert alert-danger" *ngIf="showError">
+                There was a problem logging you in.
             </div>
         </form>
     </div>

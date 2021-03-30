@@ -1,41 +1,27 @@
 {
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build .NET",
+            "label": ".NET Build",
             "command": "dotnet",
-            "type": "process",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/src/backend/sln"
+            },
             "args": [
                 "build",
-                "${workspaceFolder}/src/api/Notary.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Publish .NET",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/src/api/Notary.Api.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Watch .NET",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "${workspaceFolder}/src/api/Notary.Api.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
             "problemMatcher": "$msCompile"
         },
         {
@@ -43,17 +29,10 @@
             "script": "start",
             "label": "Angular Start",
             "isBackground": true,
-            "path": "${workspaceFolder}/web",
+            "path": "${workspaceFolder}/src/web",
+            "group": "build",
             "options": {
                 "cwd": "${workspaceFolder}/src/web"
-            },
-            "presentation": {
-                "focus": true,
-                "panel": "dedicated"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
             },
             "problemMatcher": {
                 "owner": "typescript",

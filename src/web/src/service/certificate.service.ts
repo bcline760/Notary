@@ -40,12 +40,12 @@ export class CertificateService {
     return certificates;
   }
 
-  downloadCertificate(slug: string, format: CertificateFormat, keyPassword?: string): Observable<any> {
-    let body: string = `slug=${encodeURI(slug)}&format=${format}`;
-    const url: string = `${environment.apiUrl}/certificates/${slug}/download`;
+  // downloadCertificate(slug: string, format: CertificateFormat, keyPassword?: string): Observable<any> {
+  //   let body: string = `slug=${encodeURI(slug)}&format=${format}`;
+  //   const url: string = `${environment.apiUrl}/certificates/${slug}/download`;
 
-    if (keyPassword) {
-      body += `&pwd=${keyPassword}`;
-    }
-  }
+  //   if (keyPassword) {
+  //     body += `&pwd=${keyPassword}`;
+  //   }
+  // }
 }

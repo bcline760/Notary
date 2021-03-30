@@ -4,7 +4,13 @@ import { AuthGuardService } from 'src/service/auth-guard.service';
 
 import { EncryptionComponent } from './encryption.component';
 
-const routes: Routes = [{ path: '', component: EncryptionComponent, canActivate: [AuthGuardService] }];
+const routes: Routes = [
+  {
+    path: 'encryption',
+    component: EncryptionComponent,
+    canActivate: [AuthGuardService],
+    data: { showFullLayout: true }
+  }];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

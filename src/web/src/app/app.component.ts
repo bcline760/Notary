@@ -28,7 +28,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.showFullLayout = this.activatedRoute.firstChild.snapshot.data.showFullLayout !== false;
         }
       }
-    })
+    });
   }
   title = 'Notary';
 }

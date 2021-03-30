@@ -43,6 +43,8 @@ namespace Notary.Data
                 var connectionString = config.ConnectionString;
 
                 var settings = MongoClientSettings.FromUrl(MongoUrl.Create(connectionString));
+                var credential = MongoCredential.CreateCredential("notary", config.ServiceAccountUser, config.ServiceAccountPassword);
+                settings.Credential = credential;
 
                 IMongoClient client = new MongoClient(settings);
                 IMongoDatabase db = client.GetDatabase("notary");

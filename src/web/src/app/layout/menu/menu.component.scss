@@ -1,13 +1,40 @@
 @import "../../../theme/default/theme.scss";
 
+a {
+    color: $shade-lighter
+}
+
+a:hover {
+    color: $complementary-b
+}
+
 .menu {
     background-color: $shade-darkest;
     color: #FFF;
+    height: 100vh;
 }
 
-.menu-item {
+.menu-option {
+    height: 3rem;
+    line-height: 3rem;
     margin-top: 2rem;
+    margin-left: auto;
+    margin-right: auto;
     width: 95%;
-    border: 1px $complementary-b;
-    border-radius: 2rem;
+    border: 2px $complementary-b solid;
+    border-radius: 0.5rem;
+    display: block;
+    padding-left: 0.5rem;
+}
+
+.menu-option:hover {
+    color: $shade-lighter;
+}
+
+.active-menu {
+    border: 2px $shade-lighter solid;   
+}
+
+.active-menu a {
+    color: $shade-lighter;
 }
