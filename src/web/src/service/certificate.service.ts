@@ -13,7 +13,7 @@ export class CertificateService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getCertificate(slug: string): Observable<Certificate> | null {
+  public getCertificate(slug: string): Observable<Certificate> | null {
     const url: string = `${environment.apiUrl}/certificates/${slug}`;
     try {
       const certificate: Observable<Certificate> = this.httpClient.get<Certificate>(url).pipe(
@@ -28,7 +28,7 @@ export class CertificateService {
     }
   }
 
-  getCertificates(): Observable<Certificate[]> {
+  public getCertificates(): Observable<Certificate[]> {
     const url: string = `${environment.apiUrl}/certificates`;
 
     const certificates: Observable<Certificate[]> = this.httpClient.get<Certificate[]>(url).pipe(

@@ -17,11 +17,10 @@ a:hover {
 .menu-option {
     height: 3rem;
     line-height: 3rem;
-    margin-top: 2rem;
+    margin-top: 1rem;
     margin-left: auto;
     margin-right: auto;
     width: 95%;
-    border: 2px $complementary-b solid;
     border-radius: 0.5rem;
     display: block;
     padding-left: 0.5rem;
@@ -29,10 +28,6 @@ a:hover {
 
 .menu-option:hover {
     color: $shade-lighter;
-}
-
-.active-menu {
-    border: 2px $shade-lighter solid;   
 }
 
 .active-menu a {

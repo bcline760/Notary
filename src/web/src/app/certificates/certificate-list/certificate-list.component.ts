@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CertificateService } from 'src/service/certificate.service';
+import { SessionService } from 'src/service/session.service';
 
 @Component({
   selector: 'app-certificate-list',
@@ -7,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CertificateListComponent implements OnInit {
 
-  constructor() { }
+  constructor(private certSvc: CertificateService, private sessionSvc: SessionService) { }
 
   ngOnInit(): void {
   }
