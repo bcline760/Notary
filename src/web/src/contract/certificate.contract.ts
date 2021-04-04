@@ -1,8 +1,10 @@
 import { Entity } from "./entity.contract";
 
 export interface Certificate extends Entity {
+    /** The algorithm used to create the certificate */
     algorithm: "RSA" | "EllipticCurve";
 
+    /** The distinguished name of the issuer */
     issuer: DistinguishedName;
 
     keyUsage: number;
@@ -28,11 +30,15 @@ export interface Certificate extends Entity {
     /** List of subject alternative names attached to certificate */
     sanList: SubjectAlternativeName[] | null;
 
+    /** Get the certificate's subject DN */
+    subject: DistinguishedName;
+
     /** SHA1 Thumbprint identifying the certificate */
     thumbprint: string;
 }
 
 export interface DistinguishedName {
+    /** The "Common Name" portion of the DN */
     cn: string;
 
     /** The "Country" portion of the DN */

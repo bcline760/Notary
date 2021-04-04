@@ -1,1 +1,22 @@
-<p>settings-home works!</p>
+<h1 class="display-3"><i class="fad fa-cogs"></i>&nbsp;Notary Configuration</h1>
+<div>
+    <p>This is where you can perform various configurations to Notary such as set up your Certificate Authority or
+        manage
+        accounts.</p>
+    <p>Click on any of the links below or on the menu to the left to configure Notary</p>
+</div>
+<div class="mt-1 ml-2">
+    <h3><a routerLink="/settings/accounts">Accounts</a></h3>
+    <p>Configure accounts set up with Notary.</p>
+</div>
+<div class="mt-1 ml-2">
+    <h3><a routerLink="/settings/certificate-authority">Certificate Authority</a></h3>
+    <p>Set up the main feature of this application which is the Certificate Authority</p>
+    <div class="alert alert-danger">
+        <p><strong><i class="fas fa-exclamation-triangle"></i>WARNING!<i
+                    class="fas fa-exclamation-triangle"></i></strong></p>
+        <p>It is possible to reset your CA. If your CA is reset, all your issued certificates will no longer be valid!
+        </p>
+        <p>Use caution when configuring your CA!</p>
+    </div>
+</div>

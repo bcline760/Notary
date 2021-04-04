@@ -1,1 +1,89 @@
-<p>certificate-authority works!</p>
+<div class="row">
+    <div *ngIf="rootCertificate !== null">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Root Certificate
+                </div>
+                <div class="card-body">
+                    Issued {{rootCertificate.created}}
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Algorithm {{rootCertificate.algorithm}}</li>
+                    <li class="list-group-item">Expiration {{rootCertificate.notAfter}}</li>
+                    <li class="list-group-item">Serial Number {{rootCertificate.sn}}</li>
+                    <li class="list-group-item">Thumbprint {{rootCertificate.thumbprint}}</li>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item list-group-item-primary">Subject</li>
+                        <li class="list-group-item">Common Name {{rootCertificate.subject.cn}}</li>
+                        <li class="list-group-item" *ngIf="rootCertificate.subject.c !== null"> Country
+                            {{rootCertificate.subject.c}}</li>
+                        <li class="list-group-item" *ngIf="rootCertificate.subject.s !== null">State/Province
+                            {{rootCertificate.subject.s}}</li>
+                        <li class="list-group-item" *ngIf="rootCertificate.subject.l !== null">Locale
+                            {{rootCertificate.subject.l}}</li>
+                        <li class="list-group-item" *ngIf="rootCertificate.subject.o !== null">Organization
+                            {{rootCertificate.subject.ou}}</li>
+                        <li class="list-group-item" *ngIf="rootCertificate.subject.ou !== null">Organization Unit
+                            {{rootCertificate.subject.ou}}</li>
+                    </ul>
+                    <ul class="list-group list-group-flush"
+                        *ngIf="rootCertificate.sanList !== null && rootCertificate.sanList.length > 0">
+                        <li class="list-group-item list-group-item-primary">Subject Alternative Names</li>
+                        <li *ngFor="let s in rootCertificate.sanList" class="list-group-item">
+                            {{s.kind}} - {{s.name}}
+                        </li>
+                    </ul>
+                </ul>
+                <div class="card-footer">
+                    <a [routerLink]="['certificates', 'download', rootCertificate.thumbprint]">Download Root
+                        Certificate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="intermediateCertificate !== null">
+        <div class="col">
+            <div class="card-header">
+                Intermediate Certificate
+            </div>
+            <div class="card-body">
+                Issued {{intermediateCertificate.created}}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Algorithm {{intermediateCertificate.algorithm}}</li>
+                <li class="list-group-item">Expiration {{intermediateCertificate.notAfter}}</li>
+                <li class="list-group-item">Serial Number {{intermediateCertificate.sn}}</li>
+                <li class="list-group-item">Thumbprint {{intermediateCertificate.thumbprint}}</li>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item list-group-item-primary">Subject</li>
+                    <li class="list-group-item">Common Name {{intermediateCertificate.subject.cn}}</li>
+                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.c !== null"> Country
+                        {{intermediateCertificate.subject.c}}</li>
+                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.s !== null">State/Province
+                        {{intermediateCertificate.subject.s}}</li>
+                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.l !== null">Locale
+                        {{intermediateCertificate.subject.l}}</li>
+                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.o !== null">Organization
+                        {{intermediateCertificate.subject.ou}}</li>
+                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.ou !== null">Organization Unit
+                        {{intermediateCertificate.subject.ou}}</li>
+                </ul>
+                <ul class="list-group list-group-flush"
+                    *ngIf="intermediateCertificate.sanList !== null && intermediateCertificate.sanList.length > 0">
+                    <li class="list-group-item list-group-item-primary">Subject Alternative Names</li>
+                    <li *ngFor="let s in intermediateCertificate.sanList" class="list-group-item">
+                        {{s.kind}} - {{s.name}}
+                    </li>
+                </ul>
+            </ul>
+            <div class="card-footer">
+                <a [routerLink]="['certificates', 'download', intermediateCertificate.thumbprint]">Download Intermediate
+                    Certificate</a>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="rootCertificate===null && intermediateCertificate === null">
+        <p>It looks like you have not set up your certificate authority, yet.</p>
+    </div>
+</div>
