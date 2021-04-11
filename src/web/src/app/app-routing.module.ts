@@ -19,7 +19,11 @@ const routes: Routes = [
   },
   {
     path: 'session',
-    loadChildren: () => import('./session/session.module').then(s => SessionModule)
+    loadChildren: () => import('./session/session.module').then(s => s.SessionModule)
+  },
+  {
+    path: 'settings',
+    loadChildren: () => import('./settings/settings.module').then(s => s.SettingsModule)
   },
   {
     path: '',

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { first } from 'rxjs/operators';
+import { Account } from 'src/contract/account.contract';
+import { AuthenticatedUser } from 'src/contract/authenticated-user.contract';
 import { CertificateService } from 'src/service/certificate.service';
+import { SessionService } from 'src/service/session.service';
 
 @Component({
   selector: 'app-home-display',
@@ -9,14 +12,16 @@ import { CertificateService } from 'src/service/certificate.service';
 })
 export class HomeDisplayComponent implements OnInit {
 
-  constructor(private certSvc: CertificateService) { }
+  constructor(private certSvc: CertificateService, private sessionSvc: SessionService) { }
 
   private _totalCerts: number = 0;
   private _expiringCerts: number = 0;
   private _expiredCerts: number = 0;
   private _revokedCerts: number = 0;
+  private _currentUser: AuthenticatedUser | null;
 
   ngOnInit(): void {
+    this._currentUser = this.sessionSvc.currentAuthenticatedUser;
     this._loadCertificates();
   }
 
@@ -48,4 +53,6 @@ export class HomeDisplayComponent implements OnInit {
   get expiredCerts(): number { return this._expiredCerts; }
 
   get revokedCerts(): number { return this._revokedCerts; }
+
+  get currentUser(): AuthenticatedUser | null { return this._currentUser; }
 }

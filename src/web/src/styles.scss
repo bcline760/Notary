@@ -2,7 +2,10 @@
 
 @import "theme/default/theme.scss";
 
-@import "../node_modules/bootstrap/scss/bootstrap.scss"; 
+// @import "../node_modules/bootstrap/scss/bootstrap.scss"; 
+
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
@@ -41,3 +44,4 @@ a:visited {
   padding: 0.5rem;
   border-radius: 1rem;
 }
+

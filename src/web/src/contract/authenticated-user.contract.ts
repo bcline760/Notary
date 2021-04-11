@@ -8,10 +8,10 @@ export interface AuthenticatedUser extends Entity {
     expiry: Date
 
     /** The first name of the authenticated user */
-    fName?: string;
+    firstName?: string;
 
     /** The last name of the authenticated user */
-    lName?: string;
+    lastName?: string;
 
     /** The user's login*/
     login?: string;

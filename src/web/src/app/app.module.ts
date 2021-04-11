@@ -25,6 +25,7 @@ import { LoadingInterceptor } from 'src/intercept/loading.interceptor';
 import { ErrorInterceptor } from 'src/intercept/error.interceptor';
 import { JwtInterceptor } from 'src/intercept/jwt.interceptor';
 import { SettingsModule } from './settings/settings.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 const providers: Provider[] = [
   SessionService,
@@ -67,7 +68,8 @@ const providers: Provider[] = [
     HomeModule,
     EncryptionModule,
     SettingsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgbModule
   ],
   bootstrap: [AppComponent],
   providers: providers
