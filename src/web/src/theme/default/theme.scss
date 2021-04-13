@@ -27,4 +27,19 @@ $theme-colors: (
     "warning": $warning,
     "info": $info,
     "dark": $shade-darkest
-)
+);
+
+.bg-primary {
+    background-color: $primary-color;
+}
+
+.bg-complementary-a {
+    background-color: $complementary-a;
+}
+
+.bg-complementary-b { 
+    background-color: $complementary-b;
+}
+.bg-shade-darkest { 
+    background-color: $shade-darkest;
+}

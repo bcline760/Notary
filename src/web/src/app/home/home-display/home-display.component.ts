@@ -12,13 +12,16 @@ import { SessionService } from 'src/service/session.service';
 })
 export class HomeDisplayComponent implements OnInit {
 
-  constructor(private certSvc: CertificateService, private sessionSvc: SessionService) { }
+  constructor(private certSvc: CertificateService, private sessionSvc: SessionService) {
+    this._now = new Date();
+  }
 
   private _totalCerts: number = 0;
   private _expiringCerts: number = 0;
   private _expiredCerts: number = 0;
   private _revokedCerts: number = 0;
   private _currentUser: AuthenticatedUser | null;
+  private _now: Date;
 
   ngOnInit(): void {
     this._currentUser = this.sessionSvc.currentAuthenticatedUser;
@@ -55,4 +58,6 @@ export class HomeDisplayComponent implements OnInit {
   get revokedCerts(): number { return this._revokedCerts; }
 
   get currentUser(): AuthenticatedUser | null { return this._currentUser; }
+
+  get now(): Date { return this._now; }
 }

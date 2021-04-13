@@ -1,37 +1,24 @@
-<h1 class="display-3">Welcome, {{currentUser?.firstName}}!</h1>
-<div class="container mt-2">
-    <div class="row mb-3">
-        <div class="col">
-            <h4>Look up a certificate quickly</h4>
-            <div class="input-group">
-                <span class="input-group-text" id="certificateFindText">Search</span>
-                <input type="text" id="certificateFind" name="certificateFind" class="form-control"
-                    placeholder="ex: certificates.unionsquared.lan">
+<h5 class="p-2 text-left">Welcome, {{currentUser?.firstName}}!</h5>
+<div class="container mt-3">
+
+    <div class="text-center">
+        <div class="row">
+            <div class="col border border-primary p-1 bg-primary text-light">Certificate Statistics as of
+                {{now.toDateString()}}</div>
+        </div>
+        <div class="row">
+            <div class="col border">
+                Total: {{totalCerts}}
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Certificates
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Current certificate status</p>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Total: {{totalCerts}}</li>
-                    <li class="list-group-item">Expiring: {{expiringCerts}}</li>
-                    <li class="list-group-item">Expired: {{expiredCerts}}</li>
-                    <li class="list-group-item">Revoked: {{revokedCerts}}</li>
-                </ul>
+            <div class="col border">
+                Expiring: {{expiredCerts}}
             </div>
-        </div>
-        <div class="col">
-            Something
-        </div>
-        <div class="col">
-            Something
+            <div class="col border">
+                Expired: {{expiredCerts}}
+            </div>
+            <div class="col border">
+                Revoked: {{revokedCerts}}
+            </div>
         </div>
     </div>
 </div>
