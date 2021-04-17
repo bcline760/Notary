@@ -60,6 +60,20 @@ namespace Notary.Interface.Service
         byte[] GeneratePasswordHash(string plainText);
 
         /// <summary>
+        /// Get a user's private key in PEM
+        /// </summary>
+        /// <param name="accountSlug">The slug of the account with the private key</param>
+        /// <returns>The encoded binary of the private key</returns>
+        Task<string> GetPrivateKey(string accountSlug);
+
+        /// <summary>
+        /// Get a user's public key in PEM
+        /// </summary>
+        /// <param name="accountSlug">The slug of the account holding the public key</param>
+        /// <returns>The encoded binary of the public key in PEM format</returns>
+        Task<string> GetPublicKey(string accountSlug);
+
+        /// <summary>
         /// Create a serial number used for certificate and other cryptography objects
         /// </summary>
         /// <returns>An integer value representing the serial number</returns>

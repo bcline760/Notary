@@ -22,9 +22,11 @@ namespace Notary.Api.Controllers
         public AccountController(
             ILog log,
             IAccountService service,
-            ISessionService sessionService) : base(service, log)
+            ISessionService sessionService,
+            IEncryptionService encService) : base(service, log)
         {
             SessionService = sessionService;
+            EncryptionService = encService;
         }
 
         [HttpGet, Route("{slug}/sessions/{activeOnly}")]
@@ -35,6 +37,16 @@ namespace Notary.Api.Controllers
             return sessions;
         }
 
+        [HttpGet, Route("{slug}/publickey")]
+        public async Task<IActionResult> GetPublicKey(string slug)
+        {
+            var publicKey = await ExecuteServiceMethod(EncryptionService.GetPublicKey, slug, HttpStatusCode.OK, HttpStatusCode.NotFound);
+
+            return publicKey;
+        }
+
         protected ISessionService SessionService { get; }
+
+        protected IEncryptionService EncryptionService { get; }
     }
 }

@@ -4,7 +4,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using System.Text;
 using System.IO;
 
@@ -82,6 +82,31 @@ namespace Notary.Service
             return sb.ToString();
         }
 
+        public string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry)
+        {
+            byte[] key = LoadEncryptionKey();
+            var ssk = new SymmetricSecurityKey(key);
+            SigningCredentials signingCredentials = new SigningCredentials(ssk, SecurityAlgorithms.HmacSha256Signature);
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var tokenDesc = new SecurityTokenDescriptor
+            {
+                SigningCredentials = signingCredentials,
+                Subject = claims,
+                NotBefore = DateTime.UtcNow,
+                Issuer = _config.TokenSettings.Issuer,
+                Audience = _config.TokenSettings.Audience,
+                IssuedAt = DateTime.UtcNow
+            };
+
+            if (tokenExpiry != DateTime.MaxValue)
+                tokenDesc.Expires = tokenExpiry;
+
+            var t = jwtHandler.CreateToken(tokenDesc);
+            string token = jwtHandler.WriteToken(t);
+
+            return token;
+        }
+
         /// <summary>
         /// Generate an RSA key pair
         /// </summary>
@@ -107,6 +132,69 @@ namespace Notary.Service
             keyPairGenerator.Init(keyGenerationParameters);
             var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
             return subjectKeyPair;
+        }
+
+        public byte[] GeneratePasswordHash(string plainText)
+        {
+            byte[] hashedPwd;
+            byte[] salt = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
+            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, _config.Hashing.Iterations))
+            {
+                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
+            }
+            return hashedPwd;
+        }
+
+        public async Task<string> GetPrivateKey(string accountSlug)
+        {
+            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
+            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
+
+            var generator = new Pkcs8Generator(keyPair.Private, Pkcs8Generator.PbeSha1_3DES);
+            generator.Password = _config.ApplicationKey.ToCharArray();
+            generator.SecureRandom = GetSecureRandom();
+            generator.IterationCount = 32;
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                using (TextWriter tw = new StreamWriter(memory))
+                {
+                    var pemWriter = new PemWriter(tw);
+                    var pemObject = generator.Generate();
+                    pemWriter.WriteObject(pemObject);
+                    tw.Flush();
+                }
+
+                using (var reader = new StreamReader(memory))
+                {
+                    string pem = await reader.ReadToEndAsync();
+                    return pem;
+                }
+            }
+        }
+
+        public async Task<string> GetPublicKey(string accountSlug)
+        {
+            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
+            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
+            var generator = new Pkcs8Generator(keyPair.Public, Pkcs8Generator.PbeSha1_3DES);
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                using (TextWriter tw = new StreamWriter(memory))
+                {
+                    var pemWriter = new PemWriter(tw);
+                    var pemObject = generator.Generate();
+                    pemWriter.WriteObject(pemObject);
+                    tw.Flush();
+                }
+
+                using (var reader = new StreamReader(memory))
+                {
+                    string pem = await reader.ReadToEndAsync();
+                    return pem;
+                }
+            }
         }
 
         /// <summary>
@@ -143,17 +231,6 @@ namespace Notary.Service
             return serialNumber;
         }
 
-        public byte[] GeneratePasswordHash(string plainText)
-        {
-            byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
-            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, _config.Hashing.Iterations))
-            {
-                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
-            }
-            return hashedPwd;
-        }
-
         public AsymmetricCipherKeyPair LoadKeyPair(string filePath, string encryptionKey)
         {
             using (FileStream fs = File.OpenRead(filePath))
@@ -167,31 +244,6 @@ namespace Notary.Service
 
                 return keyPair;
             }
-        }
-
-        public string GenerateJwt(ClaimsIdentity claims, DateTime tokenExpiry)
-        {
-            byte[] key = LoadEncryptionKey();
-            var ssk = new SymmetricSecurityKey(key);
-            SigningCredentials signingCredentials = new SigningCredentials(ssk, SecurityAlgorithms.HmacSha256Signature);
-            var jwtHandler = new JwtSecurityTokenHandler();
-            var tokenDesc = new SecurityTokenDescriptor
-            {
-                SigningCredentials = signingCredentials,
-                Subject = claims,
-                NotBefore = DateTime.UtcNow,
-                Issuer = _config.TokenSettings.Issuer,
-                Audience = _config.TokenSettings.Audience,
-                IssuedAt = DateTime.UtcNow
-            };
-
-            if (tokenExpiry != DateTime.MaxValue)
-                tokenDesc.Expires = tokenExpiry;
-
-            var t = jwtHandler.CreateToken(tokenDesc);
-            string token = jwtHandler.WriteToken(t);
-
-            return token;
         }
 
         public void SavePrivateKey(AsymmetricCipherKeyPair keyPair, string filePath, SecureRandom encryptionRandom)
