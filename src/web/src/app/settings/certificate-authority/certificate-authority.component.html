@@ -1,89 +1,111 @@
-<div class="row">
-    <div *ngIf="rootCertificate !== null">
+<div class="ca-setup-page">
+  <div *ngIf="rootCertificate !== null">
+
+  </div>
+  <div *ngIf="intermediateCertificate !== null">
+
+  </div>
+  <div *ngIf="rootCertificate===null && intermediateCertificate === null">
+    <form class="ml-2 mt-2" [formGroup]="caForm">
+      <div class="row mb-3 mr-1">
         <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Root Certificate
-                </div>
-                <div class="card-body">
-                    Issued {{rootCertificate.created}}
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Algorithm {{rootCertificate.algorithm}}</li>
-                    <li class="list-group-item">Expiration {{rootCertificate.notAfter}}</li>
-                    <li class="list-group-item">Serial Number {{rootCertificate.sn}}</li>
-                    <li class="list-group-item">Thumbprint {{rootCertificate.thumbprint}}</li>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item list-group-item-primary">Subject</li>
-                        <li class="list-group-item">Common Name {{rootCertificate.subject.cn}}</li>
-                        <li class="list-group-item" *ngIf="rootCertificate.subject.c !== null"> Country
-                            {{rootCertificate.subject.c}}</li>
-                        <li class="list-group-item" *ngIf="rootCertificate.subject.s !== null">State/Province
-                            {{rootCertificate.subject.s}}</li>
-                        <li class="list-group-item" *ngIf="rootCertificate.subject.l !== null">Locale
-                            {{rootCertificate.subject.l}}</li>
-                        <li class="list-group-item" *ngIf="rootCertificate.subject.o !== null">Organization
-                            {{rootCertificate.subject.ou}}</li>
-                        <li class="list-group-item" *ngIf="rootCertificate.subject.ou !== null">Organization Unit
-                            {{rootCertificate.subject.ou}}</li>
-                    </ul>
-                    <ul class="list-group list-group-flush"
-                        *ngIf="rootCertificate.sanList !== null && rootCertificate.sanList.length > 0">
-                        <li class="list-group-item list-group-item-primary">Subject Alternative Names</li>
-                        <li *ngFor="let s in rootCertificate.sanList" class="list-group-item">
-                            {{s.kind}} - {{s.name}}
-                        </li>
-                    </ul>
-                </ul>
-                <div class="card-footer">
-                    <a [routerLink]="['certificates', 'download', rootCertificate.thumbprint]">Download Root
-                        Certificate</a>
-                </div>
-            </div>
+          <p class="lead">Common Names</p>
+          This section will give the root and signing (intermediate) a name which would appear in the certificate path for your issued certificates.
+          Example of a common name would be "My Company Signing RSA SHA256 CA" or "My Company Root CA".
+
+          Both are required.
         </div>
-    </div>
-    <div *ngIf="intermediateCertificate !== null">
+      </div>
+      <div class="row mb-3 mr-1">
+        <label for="rootCommonName" class="col-sm-3 col-form-label">Root Common Name</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="rootCommonName" name="rootCommonName" />
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="interCommonName" class="col-sm-3 col-form-label">Intermediate Common Name</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="interCommonName" name="interCommonName" />
+        </div>
+      </div>
+      <div class="row mb-3 mr-1 border-top border-dark">
         <div class="col">
-            <div class="card-header">
-                Intermediate Certificate
-            </div>
-            <div class="card-body">
-                Issued {{intermediateCertificate.created}}
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Algorithm {{intermediateCertificate.algorithm}}</li>
-                <li class="list-group-item">Expiration {{intermediateCertificate.notAfter}}</li>
-                <li class="list-group-item">Serial Number {{intermediateCertificate.sn}}</li>
-                <li class="list-group-item">Thumbprint {{intermediateCertificate.thumbprint}}</li>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item list-group-item-primary">Subject</li>
-                    <li class="list-group-item">Common Name {{intermediateCertificate.subject.cn}}</li>
-                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.c !== null"> Country
-                        {{intermediateCertificate.subject.c}}</li>
-                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.s !== null">State/Province
-                        {{intermediateCertificate.subject.s}}</li>
-                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.l !== null">Locale
-                        {{intermediateCertificate.subject.l}}</li>
-                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.o !== null">Organization
-                        {{intermediateCertificate.subject.ou}}</li>
-                    <li class="list-group-item" *ngIf="intermediateCertificate.subject.ou !== null">Organization Unit
-                        {{intermediateCertificate.subject.ou}}</li>
-                </ul>
-                <ul class="list-group list-group-flush"
-                    *ngIf="intermediateCertificate.sanList !== null && intermediateCertificate.sanList.length > 0">
-                    <li class="list-group-item list-group-item-primary">Subject Alternative Names</li>
-                    <li *ngFor="let s in intermediateCertificate.sanList" class="list-group-item">
-                        {{s.kind}} - {{s.name}}
-                    </li>
-                </ul>
-            </ul>
-            <div class="card-footer">
-                <a [routerLink]="['certificates', 'download', intermediateCertificate.thumbprint]">Download Intermediate
-                    Certificate</a>
-            </div>
+          <p class="lead">Issuer Details</p>
+          The fields below give information about the Certificate Authority. Which organization (company, government, etc), the org unit (like IT), and
+          where it is located. These are all optional but, to give additional credence to your CA, fill out as much and as accurately as possible.
         </div>
-    </div>
-    <div *ngIf="rootCertificate===null && intermediateCertificate === null">
-        <p>It looks like you have not set up your certificate authority, yet.</p>
-    </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="organization" class="col-sm-3 col-form-label">Organization</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="organization" name="organization" />
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="organizationUnit" class="col-sm-3 col-form-label">Organizational Unit</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="organizationUnit" name="organizationUnit" />
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="locale" class="col-sm-3 col-form-label">Locale (City)</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="locale" name="locale" />
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="province" class="col-sm-3 col-form-label">State or Province</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="province" name="province" />
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="country" class="col-sm-3 col-form-label">Country</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="country" name="country" />
+        </div>
+      </div>
+      <div class="row mb-3 mr-1 border-top border-dark">
+        <div class="col">
+          <p class="lead">Key Length</p>
+          Select one of: 1,024, 2,048, or 4,096 as one of your key lengths. Industry standard is 2,048. 4,096 is stronger, but it will require more computational effort using the certificate to sign, encrypt, etc.
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="keyLength" class="col-sm-3 col-form-label">Key Length</label>
+        <div class="col-sm-7">
+          <select name="keyLength" id="keyLength" class="form-control">
+            <option value="-1" selected>Select Key Length</option>
+            <option value="1024">1,024</option>
+            <option value="2048">2,048</option>
+            <option value="4096">4,096</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3 mr-1 border-top border-dark">
+        <div class="col">
+          <p class="lead">CA Validity Duration</p>
+          Pick one of 5, 10, 15 years. Typical length is 10 years for a CA certificate. Too short of a time and you will have to renew your CA frequently which might cause difficulty with your issued certificate.
+          Too long of a time increases CA compromise and obsolecense.
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <label for="lengthInYears" class="col-sm-3 col-form-label">Duration in Years</label>
+        <div class="col-sm-7">
+          <select name="lengthInYears" id="lengthInYears" class="form-control">
+            <option value="-1" selected>Select Duration</option>
+            <option value="5">5 Years</option>
+            <option value="10">10 Years</option>
+            <option value="15">15 Years</option>
+          </select>
+        </div>
+      </div>
+      <div class="mb-3 row mr-1">
+        <div class="col text-center">
+          <input type="button" class="btn btn-primary" (ngClick)="setupCertificateAuthority()" value="Setup CA" />&nbsp;
+          <input type="reset" class="btn btn-secondary" value="Reset" />
+        </div>
+      </div>
+    </form>
+  </div>
 </div>

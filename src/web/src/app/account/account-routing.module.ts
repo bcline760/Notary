@@ -14,7 +14,8 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: AccountDetailComponent
+        component: AccountDetailComponent,
+        pathMatch: 'full'
       }
     ]
   }

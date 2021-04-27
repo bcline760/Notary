@@ -10,6 +10,7 @@ export class AccountDetailComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    console.log('A thing');
   }
 
 }

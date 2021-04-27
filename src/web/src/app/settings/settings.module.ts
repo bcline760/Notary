@@ -6,6 +6,8 @@ import { CertificateAuthorityComponent } from './certificate-authority/certifica
 import { SettingsHomeComponent } from './settings-home/settings-home.component';
 import { SettingsComponent } from './settings.component';
 import { AccountsComponent } from './accounts/accounts.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CertificateService } from '../../service/certificate.service';
 
 
 
@@ -13,7 +15,10 @@ import { AccountsComponent } from './accounts/accounts.component';
   declarations: [CertificateAuthorityComponent, SettingsHomeComponent, SettingsComponent, AccountsComponent],
   imports: [
     NotaryModule,
+    FormsModule,
+    ReactiveFormsModule,
     SettingsRoutingModule
-  ]
+  ],
+  providers: [CertificateService]
 })
 export class SettingsModule { }
