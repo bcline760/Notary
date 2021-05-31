@@ -19,6 +19,9 @@ namespace Notary.Contract
         [JsonProperty("expireLength", Required = Required.Always)]
         public int LengthInHours { get; set; }
 
+        [JsonProperty("password", Required = Required.Always)]
+        public string CertificatePassword { get; set; }
+
         /// <summary>
         /// Get or set the X500 Distinguished Name for the certificate subject.
         /// </summary>

@@ -20,8 +20,8 @@ namespace Notary
         ActiveDirectory,
 
         /// <summary>
-        /// Sign on to the system using SAML. This is use for Single Sign-On
+        /// Sign on to the system using OpenID. This is use for Single Sign-On
         /// </summary>
-        SAML
+        OpenId
     }
 }

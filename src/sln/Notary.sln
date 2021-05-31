@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{93F726
 		..\backend\Dockerfile = ..\backend\Dockerfile
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notary.Setup", "..\setup\Notary.Setup.csproj", "{26427100-6C01-49C8-BB52-82B1C04F277C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{4E9E7042-1809-435A-B2A4-96949C2277FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E9E7042-1809-435A-B2A4-96949C2277FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E9E7042-1809-435A-B2A4-96949C2277FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26427100-6C01-49C8-BB52-82B1C04F277C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26427100-6C01-49C8-BB52-82B1C04F277C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26427100-6C01-49C8-BB52-82B1C04F277C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26427100-6C01-49C8-BB52-82B1C04F277C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

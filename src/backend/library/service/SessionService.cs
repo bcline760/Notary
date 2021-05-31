@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using log4net;
 
 using Notary.Contract;
-using Notary.Interface.Repository;
+using Notary.Configuration;
 using Notary.Interface.Service;
 using System.Linq;
 

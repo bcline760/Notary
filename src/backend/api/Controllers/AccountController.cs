@@ -37,14 +37,6 @@ namespace Notary.Api.Controllers
             return sessions;
         }
 
-        [HttpGet, Route("{slug}/publickey")]
-        public async Task<IActionResult> GetPublicKey(string slug)
-        {
-            var publicKey = await ExecuteServiceMethod(EncryptionService.GetPublicKey, slug, HttpStatusCode.OK, HttpStatusCode.NotFound);
-
-            return publicKey;
-        }
-
         protected ISessionService SessionService { get; }
 
         protected IEncryptionService EncryptionService { get; }

@@ -10,19 +10,19 @@ using System.IO;
 
 using Microsoft.IdentityModel.Tokens;
 
-using Notary.Interface.Service;
-
 using log4net;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Utilities;
-
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
+
+using Notary.Configuration;
+using Notary.Interface.Service;
 
 namespace Notary.Service
 {
@@ -35,30 +35,6 @@ namespace Notary.Service
         {
             _config = config;
             _log = log;
-        }
-
-        public byte[] Decrypt(byte[] encryptedData, string accountSlug)
-        {
-            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
-
-            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
-            var decryptEngine = new Pkcs1Encoding(new RsaEngine());
-            decryptEngine.Init(false, keyPair.Private);
-
-            var decryptedBytes = decryptEngine.ProcessBlock(encryptedData, 0, encryptedData.Length);
-            return decryptedBytes;
-        }
-
-        public byte[] Encrypt(byte[] data, string accountSlug)
-        {
-            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
-
-            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
-            var encryptEngine = new Pkcs1Encoding(new RsaEngine());
-            encryptEngine.Init(true, keyPair.Public);
-
-            var encryptedBytes = encryptEngine.ProcessBlock(data, 0, data.Length);
-            return encryptedBytes;
         }
 
         public string Hash(string content)
@@ -137,64 +113,12 @@ namespace Notary.Service
         public byte[] GeneratePasswordHash(string plainText)
         {
             byte[] hashedPwd;
-            byte[] salt = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
-            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, _config.Hashing.Iterations))
+            byte[] salt = Encoding.UTF8.GetBytes(Constants.PasswordSalt);
+            using (var rfc = new Rfc2898DeriveBytes(plainText, salt, Constants.PasswordHashIterations))
             {
-                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
+                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
             }
             return hashedPwd;
-        }
-
-        public async Task<string> GetPrivateKey(string accountSlug)
-        {
-            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
-            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
-
-            var generator = new Pkcs8Generator(keyPair.Private, Pkcs8Generator.PbeSha1_3DES);
-            generator.Password = _config.ApplicationKey.ToCharArray();
-            generator.SecureRandom = GetSecureRandom();
-            generator.IterationCount = 32;
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                using (TextWriter tw = new StreamWriter(memory))
-                {
-                    var pemWriter = new PemWriter(tw);
-                    var pemObject = generator.Generate();
-                    pemWriter.WriteObject(pemObject);
-                    tw.Flush();
-                }
-
-                using (var reader = new StreamReader(memory))
-                {
-                    string pem = await reader.ReadToEndAsync();
-                    return pem;
-                }
-            }
-        }
-
-        public async Task<string> GetPublicKey(string accountSlug)
-        {
-            string path = $"{_config.RootDirectory}/{_config.UserKeyPath}/{accountSlug}.key.pem";
-            var keyPair = LoadKeyPair(path, _config.ApplicationKey);
-            var generator = new Pkcs8Generator(keyPair.Public, Pkcs8Generator.PbeSha1_3DES);
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                using (TextWriter tw = new StreamWriter(memory))
-                {
-                    var pemWriter = new PemWriter(tw);
-                    var pemObject = generator.Generate();
-                    pemWriter.WriteObject(pemObject);
-                    tw.Flush();
-                }
-
-                using (var reader = new StreamReader(memory))
-                {
-                    string pem = await reader.ReadToEndAsync();
-                    return pem;
-                }
-            }
         }
 
         /// <summary>
@@ -317,10 +241,10 @@ namespace Notary.Service
         public bool VerifyPasswordHash(byte[] passwordHash)
         {
             byte[] hashedPwd;
-            byte[] saltBytes = Encoding.UTF8.GetBytes(_config.Hashing.Salt);
-            using (var rfc = new Rfc2898DeriveBytes(passwordHash, saltBytes, _config.Hashing.Iterations))
+            byte[] saltBytes = Encoding.UTF8.GetBytes(Constants.PasswordSalt);
+            using (var rfc = new Rfc2898DeriveBytes(passwordHash, saltBytes, Constants.PasswordHashIterations))
             {
-                hashedPwd = rfc.GetBytes(_config.Hashing.Length);
+                hashedPwd = rfc.GetBytes(Constants.PasswordHashLength);
             }
 
             return hashedPwd.AreBytesEqual(passwordHash);

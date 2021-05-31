@@ -8,22 +8,27 @@ using System.Linq;
 using log4net;
 
 using Org.BouncyCastle.X509;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Operators;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Operators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Math.EC;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 
+using Notary.Configuration;
 using Notary.Contract;
 using Notary.Interface.Repository;
 using Notary.Interface.Service;
 using Notary.Logging;
-using Org.BouncyCastle.OpenSsl;
 
 namespace Notary.Service
 {
@@ -31,13 +36,13 @@ namespace Notary.Service
     {
         public CertificateService(
             NotaryConfiguration config,
+            NotaryCaConfiguration caConfig,
             ICertificateRepository repository,
             IRevocatedCertificateRepository revocatedCertificateRepo,
-            ILog log,
-            IEncryptionService encryption) : base(repository, log)
+            ILog log) : base(repository, log)
         {
-            EncryptionService = encryption;
             Configuration = config;
+            CaConfiguration = caConfig;
             RevocatedCertificateRepository = revocatedCertificateRepo;
         }
 
@@ -50,13 +55,14 @@ namespace Notary.Service
                     throw new InvalidOperationException("Signing certificate doesn't exist.");
 
                 //Load the issuer's private key from the file system.
-                string signingPrivateKeyPath = $"{Configuration.Intermediate.PrivateKeyDirectory}/{signingCert.Thumbprint}.key.pem";
-                var issuerKeyPair = EncryptionService.LoadKeyPair(signingPrivateKeyPath, Configuration.ApplicationKey);
+                
+                string signingPrivateKeyPath = $"{CaConfiguration.SigningCertificatePath}/{Constants.KeyDirectoryPath}/{signingCert.Thumbprint}.key.pem";
+                var issuerKeyPair = LoadKeyPair(signingPrivateKeyPath, Configuration.ApplicationKey, CaConfiguration.CaKeyAlgorithm);
 
                 var issuerSn = new BigInteger(signingCert.SerialNumber, 16);
-                var random = EncryptionService.GetSecureRandom();
-                var certificateKeyPair = EncryptionService.GenerateKeyPair(random, 2048);
-                var serialNumber = EncryptionService.GenerateSerialNumber(random);
+                var random = GetSecureRandom();
+                var certificateKeyPair = GenerateKeyPair(random, CaConfiguration.KeySize, CaConfiguration.CaKeyAlgorithm);
+                var serialNumber = GenerateSerialNumber(random);
                 var certificateDn = DistinguishedName.BuildDistinguishedName(request.Subject);
                 var notAfter = DateTime.UtcNow.AddHours(request.LengthInHours);
                 var issuerDn = DistinguishedName.BuildDistinguishedName(signingCert.Subject);
@@ -83,11 +89,11 @@ namespace Notary.Service
 
                 var thumbprint = GetThumbprint(generatedCertificate);
 
-                var issuedKeyPath = $"{Configuration.RootDirectory}/{Configuration.Issued.PrivateKeyDirectory}/{thumbprint}.key.pem";
-                var issuedCertPath = $"{Configuration.RootDirectory}/{Configuration.Issued.CertificateDirectory}/{thumbprint}.cer";
+                var issuedKeyPath = $"{CaConfiguration.IssuedCertificatePath}/{Constants.KeyDirectoryPath}/{thumbprint}.key.pem";
+                var issuedCertPath = $"{CaConfiguration.IssuedCertificatePath}/{Constants.CertificateDirectoryPath}/{thumbprint}.cer";
 
                 //Save encrypted private key and certificate to the file system
-                EncryptionService.SavePrivateKey(certificateKeyPair, issuedKeyPath, random);
+                SavePrivateKey(certificateKeyPair, issuedKeyPath, random, request.CertificatePassword);
                 SaveCertificate(generatedCertificate, issuedCertPath);
 
                 var certificate = new Certificate
@@ -123,7 +129,7 @@ namespace Notary.Service
 
             byte[] certificateBinary = null;
 
-            var certPath = $"{Configuration.RootDirectory}/{Configuration.Issued.CertificateDirectory}/{certificate.Thumbprint}.cer";
+            var certPath = $"{CaConfiguration.IssuedCertificatePath}/{Constants.CertificateDirectoryPath}/{certificate.Thumbprint}.cer";
             X509Certificate cert = await LoadCertificate(certPath);
             if (cert == null)
                 return null;
@@ -135,8 +141,8 @@ namespace Notary.Service
                 case CertificateFormat.Pem:
                     break;
                 case CertificateFormat.Pkcs12:
-                    var certKeyPath = $"{Configuration.RootDirectory}/{Configuration.Issued.PrivateKeyDirectory}/{certificate.Thumbprint}.key.pem";
-                    var certKey = EncryptionService.LoadKeyPair(certKeyPath, Configuration.ApplicationKey);
+                    var certKeyPath = $"{CaConfiguration.IssuedCertificatePath}/{Constants.KeyDirectoryPath}/{certificate.Thumbprint}.key.pem";
+                    var certKey = LoadKeyPair(certKeyPath, privateKeyPassword, CaConfiguration.CaKeyAlgorithm);
                     var store = new Pkcs12StoreBuilder().Build();
                     var certEntry = new X509CertificateEntry(cert);
                     var keyEntry = new AsymmetricKeyEntry(certKey.Private);
@@ -144,7 +150,7 @@ namespace Notary.Service
                     store.SetKeyEntry(certificate.Subject.ToString(), keyEntry, new X509CertificateEntry[] { certEntry });
                     using (var memStream = new MemoryStream())
                     {
-                        store.Save(memStream, privateKeyPassword.ToArray(), EncryptionService.GetSecureRandom());
+                        store.Save(memStream, privateKeyPassword.ToArray(), GetSecureRandom());
                         certificateBinary = memStream.ToArray();
                     }
                     break;
@@ -188,15 +194,15 @@ namespace Notary.Service
 
         public async Task GenerateCaCertificates(CertificateAuthoritySetup setup)
         {
-            var randomRoot = EncryptionService.GetSecureRandom();
-            var snRoot = EncryptionService.GenerateSerialNumber(randomRoot);
-            var rootKeyPair = EncryptionService.GenerateKeyPair(randomRoot, setup.KeyLength);
+            var randomRoot = GetSecureRandom();
+            var snRoot = GenerateSerialNumber(randomRoot);
+            var rootKeyPair = GenerateKeyPair(randomRoot, setup.KeyLength, CaConfiguration.CaKeyAlgorithm);
 
-            var intermediateRandom = EncryptionService.GetSecureRandom();
-            var snIntermediate = EncryptionService.GenerateSerialNumber(intermediateRandom);
-            var intermediateKeyPair = EncryptionService.GenerateKeyPair(intermediateRandom, setup.KeyLength);
+            var signingRandom = GetSecureRandom();
+            var snIntermediate = GenerateSerialNumber(signingRandom);
+            var signingKeyPair = GenerateKeyPair(signingRandom, setup.KeyLength, CaConfiguration.CaKeyAlgorithm);
 
-            X509Certificate rootCertificate = null, intermediateCertificate = null;
+            X509Certificate rootCertificate = null, signingCertificate = null;
             try
             {
                 rootCertificate = GenerateCertificate(
@@ -237,11 +243,11 @@ namespace Notary.Service
                 //Persist the certificate to the data store.
                 await SaveAsync(rootCertificateData, setup.Requestor);
 
-                intermediateCertificate = GenerateCertificate(
+                signingCertificate = GenerateCertificate(
                     new List<SubjectAlternativeName>(),
-                    intermediateRandom,
-                    DistinguishedName.BuildDistinguishedName(setup.IntermediateDn),
-                    intermediateKeyPair,
+                    signingRandom,
+                    DistinguishedName.BuildDistinguishedName(setup.SigningDn),
+                    signingKeyPair,
                     snIntermediate,
                     DistinguishedName.BuildDistinguishedName(setup.RootDn),
                     DateTime.UtcNow.AddYears(setup.LengthInYears),
@@ -258,37 +264,37 @@ namespace Notary.Service
                     KeyPurposeID.IdKPTimeStamping
                     });
 
-                var interThumb = GetThumbprint(intermediateCertificate);
+                var interThumb = GetThumbprint(signingCertificate);
 
-                var intermediateCertificateData = new Certificate
+                var signingCertificateData = new Certificate
                 {
                     Active = true,
                     Algorithm = Algorithm.RSA,
                     Created = DateTime.Now,
                     Issuer = setup.RootDn,
                     SubjectAlternativeNames = new List<SubjectAlternativeName>(),
-                    Subject = setup.IntermediateDn,
+                    Subject = setup.SigningDn,
                     KeyUsage = (int)KeyUsageFlags.CodeSigning,
                     NotAfter = DateTime.UtcNow.AddYears(setup.LengthInYears),
                     NotBefore = DateTime.UtcNow,
                     SigningCertificateSlug = rootCertificateData.Slug,
                     CreatedBySlug = setup.Requestor,
                     PrimarySigningCertificate = true,
-                    SerialNumber = intermediateCertificate.SerialNumber.ToString(),
+                    SerialNumber = signingCertificate.SerialNumber.ToString(),
                     Thumbprint = interThumb
                 };
 
-                await SaveAsync(intermediateCertificateData, setup.Requestor);
+                await SaveAsync(signingCertificateData, setup.Requestor);
 
-                string rootPkPath = $"{Configuration.RootDirectory}/{Configuration.Root.PrivateKeyDirectory}/{rootCertificateData.Thumbprint}.key.pem";
-                string intermediatePkPath = $"{Configuration.RootDirectory}/{Configuration.Intermediate.PrivateKeyDirectory}/{intermediateCertificateData.Thumbprint}.key.pem";
-                EncryptionService.SavePrivateKey(rootKeyPair, rootPkPath, randomRoot);
-                EncryptionService.SavePrivateKey(intermediateKeyPair, intermediatePkPath, intermediateRandom);
+                string rootPkPath = $"{CaConfiguration.RootCertificatePath}/{Constants.KeyDirectoryPath}/{rootCertificateData.Thumbprint}.key.pem";
+                string signingPkPath = $"{CaConfiguration.RootCertificatePath}/{Constants.KeyDirectoryPath}/{signingCertificateData.Thumbprint}.key.pem";
+                SavePrivateKey(rootKeyPair, rootPkPath, randomRoot, Configuration.ApplicationKey);
+                SavePrivateKey(signingKeyPair, signingPkPath, signingRandom, Configuration.ApplicationKey);
 
-                string rootCertPath = $"{Configuration.RootDirectory}/{Configuration.Root.CertificateDirectory}/{rootCertificateData.Thumbprint}.cer";
-                string intermediateCertPath = $"{Configuration.RootDirectory}/{Configuration.Intermediate.CertificateDirectory}/{intermediateCertificateData.Thumbprint}.cer";
+                string rootCertPath = $"{CaConfiguration.SigningCertificatePath}/{Constants.CertificateDirectoryPath}/{rootCertificateData.Thumbprint}.cer";
+                string signingCertificatePath = $"{CaConfiguration.SigningCertificatePath}/{Constants.CertificateDirectoryPath}/{signingCertificateData.Thumbprint}.cer";
                 SaveCertificate(rootCertificate, rootCertPath);
-                SaveCertificate(intermediateCertificate, intermediateCertPath);
+                SaveCertificate(signingCertificate, signingCertificatePath);
             }
             catch (Exception cex)
             {
@@ -304,6 +310,118 @@ namespace Notary.Service
         }
 
         #region Private Methods
+
+        /// <summary>
+        /// Generate a cryptographically secure random number
+        /// </summary>
+        /// <returns>The cryptographically secure random number generated object</returns>
+        private static SecureRandom GetSecureRandom()
+        {
+            var random = new SecureRandom();
+            return random;
+        }
+
+
+        /// <summary>
+        /// Generate a key pair.
+        /// </summary>
+        /// <param name="random">The random number generator.</param>
+        /// <param name="strength">The key length in bits. For RSA, 2048 bits should be considered the minimum acceptable these days.</param>
+        /// <returns></returns>
+        private static AsymmetricCipherKeyPair GenerateKeyPair(SecureRandom random, int strength, Algorithm algorithm)
+        {
+            AsymmetricCipherKeyPair keyPair = null;
+
+            if (algorithm == Algorithm.RSA)
+            {
+                var keyGenerationParameters = new KeyGenerationParameters(random, strength);
+                var keyPairGenerator = new RsaKeyPairGenerator();
+                keyPairGenerator.Init(keyGenerationParameters);
+                keyPair = keyPairGenerator.GenerateKeyPair();
+            }
+            else if (algorithm == Algorithm.EllipticCurve)
+            {
+                var ecp = NistNamedCurves.GetByName("P-521"); //TODO: Refactor
+
+                var curve = (FpCurve)ecp.Curve;
+                var domain = new ECDomainParameters(curve, ecp.G, ecp.N, ecp.H);
+
+                var keyGenerationParameters = new ECKeyGenerationParameters(domain, random);
+                var ecGenerator = new ECKeyPairGenerator();
+                ecGenerator.Init(keyGenerationParameters);
+
+                keyPair = ecGenerator.GenerateKeyPair();
+            }
+
+            return keyPair;
+        }
+
+
+        /// <summary>
+        /// Create a serial number used for certificate and other cryptography objects
+        /// </summary>
+        /// <param name="random">A crypto-random number generated</param>
+        /// <returns>An integer value representing the serial number</returns>
+        private static BigInteger GenerateSerialNumber(SecureRandom random)
+        {
+            var serialNumber =
+                BigIntegers.CreateRandomInRange(
+                    BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            return serialNumber;
+        }
+
+        private static AsymmetricCipherKeyPair LoadKeyPair(string filePath, string encryptionKey, Algorithm algorithm)
+        {
+            AsymmetricCipherKeyPair keyPair = null;
+            using (FileStream fs = File.OpenRead(filePath))
+            using (TextReader tr = new StreamReader(fs))
+            {
+                PemReader pr = new PemReader(tr, new PasswordFinder(encryptionKey));
+                
+                if (algorithm == Algorithm.RSA)
+                {
+                    var pemObject = pr.ReadObject();
+                    var privateKey = (RsaPrivateCrtKeyParameters)pemObject;
+                    var publicKey = new RsaKeyParameters(false, privateKey.Modulus, privateKey.PublicExponent);
+                    keyPair = new AsymmetricCipherKeyPair(publicKey, privateKey);
+                }
+                else if (algorithm == Algorithm.EllipticCurve)
+                {
+                    var pem = pr.ReadPemObject();
+                    var ellipticCurve = NistNamedCurves.GetByName("P-521"); //TODO: Refactor
+
+                    var curve = (FpCurve)ellipticCurve.Curve;
+                    var domain = new ECDomainParameters(curve, ellipticCurve.G, ellipticCurve.N, ellipticCurve.H);
+
+                    var d = new BigInteger(pem.Content);
+                    var q = domain.G.Multiply(d);
+
+                    var publicKey = new ECPublicKeyParameters(q, domain);
+                }
+            }
+
+            return keyPair;
+        }
+
+        private static void SavePrivateKey(AsymmetricCipherKeyPair keyPair, string filePath, SecureRandom encryptionRandom, string pkPassword)
+        {
+            var generator = new Pkcs8Generator(keyPair.Private, Pkcs8Generator.PbeSha1_3DES);
+            generator.Password = pkPassword.ToCharArray();
+            generator.SecureRandom = encryptionRandom;
+            generator.IterationCount = 32;
+
+            var pemObject = generator.Generate();
+            using (FileStream fs = File.OpenWrite(filePath))
+            using (TextWriter tw = new StreamWriter(fs))
+            {
+                PemWriter pemWriter = new PemWriter(tw);
+                pemWriter.WriteObject(pemObject);
+                pemWriter.Writer.Flush();
+            }
+        }
+
+        #region Certificate Private Methods
+
         /// <summary>
         /// Add the Authority Key Identifier. According to http://www.alvestrand.no/objectid/2.5.29.35.html, this
         /// identifies the public key to be used to verify the signature on this certificate.
@@ -493,11 +611,14 @@ namespace Notary.Service
 
             return Encoding.ASCII.GetString(hexBytes);
         }
+
         #endregion
 
-        protected IEncryptionService EncryptionService { get; }
+        #endregion
 
         protected NotaryConfiguration Configuration { get; }
+
+        protected NotaryCaConfiguration CaConfiguration { get; }
 
         protected IRevocatedCertificateRepository RevocatedCertificateRepository { get; }
     }
