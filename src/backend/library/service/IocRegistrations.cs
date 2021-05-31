@@ -4,6 +4,7 @@ using System.Text;
 
 using Autofac;
 
+using Notary.Configuration;
 using Notary.IOC;
 using Notary.Interface.Service;
 using log4net;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 
 using Notary.Contract;
-using Notary.Interface.Repository;
+using Notary.Configuration;
 using Notary.Interface.Service;
 
 namespace Notary.Service

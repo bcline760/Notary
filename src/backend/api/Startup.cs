@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+using Notary.Configuration;
 using Notary.Service;
 
 namespace Notary.Api
@@ -35,36 +36,56 @@ namespace Notary.Api
         {
             var config = Configuration.GetSection("Notary").Get<NotaryConfiguration>();
 
-            services.AddAuthentication(x =>
+            var jwtEvents= new JwtBearerEvents()
             {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = true;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+                OnAuthenticationFailed = async (AuthenticationFailedContext arg) =>
                 {
-                    ValidateAudience = HostEnvironment.IsProduction(),
-                    ValidateIssuer = HostEnvironment.IsProduction(),
-                    ValidateTokenReplay = HostEnvironment.IsProduction(),
-                    ValidateIssuerSigningKey = HostEnvironment.IsProduction(),
-                    IssuerSigningKey = new SymmetricSecurityKey(LoadEncryptionKey()),
-                    ValidAudience = config.TokenSettings.Audience,
-                    ValidIssuer = config.TokenSettings.Issuer
-                };
+                    Console.WriteLine(arg.Exception.Message);
+                },
+                OnTokenValidated = async (TokenValidatedContext arg) =>
+                {
+                }
+            };
 
-                x.Events = new JwtBearerEvents()
+            if (config.Authentication == AuthenticationProvider.ActiveDirectory || config.Authentication == AuthenticationProvider.System)
+            {
+                services.AddAuthentication(x =>
                 {
-                    OnAuthenticationFailed = async (AuthenticationFailedContext arg) =>
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(x =>
+                {
+                    x.Events = jwtEvents;
+                    x.RequireHttpsMetadata = true;
+                    x.SaveToken = true;
+                    x.TokenValidationParameters = new TokenValidationParameters
                     {
-                        Console.WriteLine(arg.Exception.Message);
-                    },
-                    OnTokenValidated = async (TokenValidatedContext arg) =>
-                    {
-                    }
-                };
-            });
+                        ValidateAudience = HostEnvironment.IsProduction(),
+                        ValidateIssuer = HostEnvironment.IsProduction(),
+                        ValidateTokenReplay = HostEnvironment.IsProduction(),
+                        ValidateIssuerSigningKey = HostEnvironment.IsProduction(),
+                        IssuerSigningKey = new SymmetricSecurityKey(LoadEncryptionKey()),
+                        ValidAudience = config.TokenSettings.Audience,
+                        ValidIssuer = config.TokenSettings.Issuer
+                    };
+                });
+            }
+
+            if (config.Authentication == AuthenticationProvider.OpenId)
+            {
+                services.AddAuthentication(x =>
+                {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(x =>
+                {
+                    x.Events = jwtEvents;
+                    x.MetadataAddress = config.TokenSettings.OpenIdMetadataAddress;
+                    x.RequireHttpsMetadata = true;
+                    x.SaveToken = true;
+                });
+            }
+
             services.AddAuthorization(o =>
             {
                 o.AddPolicy("Admin", p => p.RequireClaim(ClaimTypes.Role, "Admin"));
@@ -104,10 +125,7 @@ namespace Notary.Api
             // Use environment variables for sensitive attributes in production. 
             if (HostEnvironment.IsProduction())
             {
-                config.ApplicationKey = Environment.GetEnvironmentVariable(Constants.ApplicationKeyEnvName);
-                config.ConnectionString = Environment.GetEnvironmentVariable(Constants.DatabaseConnectionStringEnvName);
-                config.ServiceAccountUser = Environment.GetEnvironmentVariable(Constants.ServiceAccountUserEnvName);
-                config.ServiceAccountPassword = Environment.GetEnvironmentVariable(Constants.ServiceAccountPassEnvName);
+
             }
             builder.RegisterInstance(config).SingleInstance();
 
@@ -139,43 +157,6 @@ namespace Notary.Api
             });
         }
 
-        private Hashing ConfigureHashing()
-        {
-            Hashing hash = null;
-            if (File.Exists(".hashing"))
-            {
-                string rawText = null;
-                using (TextReader tr = File.OpenText(".hashing"))
-                {
-                    rawText = tr.ReadToEnd();
-                }
-
-                string json = Encoding.Default.GetString(Convert.FromBase64String(rawText));
-                hash = JsonConvert.DeserializeObject<Hashing>(json);
-            }
-            else
-            {
-                var provider = RandomNumberGenerator.Create();
-                byte[] rngBytes = new byte[32];
-                provider.GetNonZeroBytes(rngBytes);
-
-                hash = new Hashing
-                {
-                    Iterations = Constants.PasswordHashIterations,
-                    Length = Constants.PasswordHashLength,
-                    Salt = Convert.ToBase64String(rngBytes)
-                };
-                string json = JsonConvert.SerializeObject(hash);
-                string b64Json = Convert.ToBase64String(Encoding.Default.GetBytes(json));
-
-                using (TextWriter tw = new StreamWriter(File.OpenWrite(".hashing")))
-                {
-                    tw.Write(b64Json);
-                }
-            }
-
-            return hash;
-        }
 
         //TODO: Figure out how to refactor this properly
         private byte[] LoadEncryptionKey()

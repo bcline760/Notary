@@ -8,7 +8,7 @@ using Novell.Directory.Ldap;
 
 using Notary.Logging;
 using Notary.Contract;
-using Notary.Interface.Repository;
+using Notary.Configuration;
 using Notary.Interface.Service;
 using Notary.Service.Directory;
 
@@ -41,7 +41,7 @@ namespace Notary.Service
 
         public async Task<AuthenticatedUser> SignInAsync(ICredentials credentials)
         {
-            string dn = $"{credentials.Key}@{Configuration.DirectorySettings.Domain}";
+            string dn = $"{credentials.Key}@{Configuration.ActiveDirectory.Domain}";
 
             try
             {
@@ -93,9 +93,9 @@ namespace Notary.Service
         {
             foreach (var group in memberOf)
             {
-                if (group.Contains(Configuration.DirectorySettings.AdminGroupName))
+                if (group.Contains(Configuration.ActiveDirectory.AdminGroupName))
                     return Roles.Admin;
-                else if (group.Contains(Configuration.DirectorySettings.CertificateAdminGroupName)) ;
+                else if (group.Contains(Configuration.ActiveDirectory.CertificateAdminGroupName))
                     return Roles.CertificateAdmin;
             }
 
@@ -109,7 +109,7 @@ namespace Notary.Service
                 SecureSocketLayer = false
             };
 
-            connection.Connect(Configuration.DirectorySettings.ServerName, LdapConnection.DefaultPort);
+            connection.Connect(Configuration.ActiveDirectory.ServerName, LdapConnection.DefaultPort);
 
             return connection;
         }
@@ -117,7 +117,7 @@ namespace Notary.Service
         private DirectoryEntity GetDirectoryUser(string username)
         {
             var filter = $"(&(objectClass=user)(samAccountName={username}))";
-            var searchResults = Connection.Search(Configuration.DirectorySettings.SearchBase, LdapConnection.ScopeSub, filter, _attributes, false);
+            var searchResults = Connection.Search(Configuration.ActiveDirectory.SearchBase, LdapConnection.ScopeSub, filter, _attributes, false);
 
             DirectoryEntity user = null;
 

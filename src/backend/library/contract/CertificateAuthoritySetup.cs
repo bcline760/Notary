@@ -12,7 +12,7 @@ namespace Notary.Contract
         public DistinguishedName RootDn { get; set; }
 
         [JsonProperty("intermediate_dn", Required = Required.Always)]
-        public DistinguishedName IntermediateDn { get; set; }
+        public DistinguishedName SigningDn { get; set; }
 
         [JsonProperty("key_length", Required = Required.Always)]
         public int KeyLength { get; set; }

@@ -6,6 +6,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
+
+using Notary.Configuration;
 using Notary.Contract;
 using Notary.Interface.Repository;
 using Notary.Interface.Service;
@@ -53,23 +55,7 @@ namespace Notary.Service
                     account.Password = Convert.ToBase64String(passwordHash);
                 }
 
-                var keyPair = EncService.GenerateKeyPair(2048);
-                var rsaPublicKey = (RsaKeyParameters)keyPair.Public;
-                using (StringWriter sw = new StringWriter())
-                {
-                    PemWriter pemWriter = new PemWriter(sw);
-                    pemWriter.WriteObject(rsaPublicKey);
-                    pemWriter.Writer.Flush();
-
-                    account.PublicKey = sw.ToString();
-                }
-
                 await SaveAsync(account, null);
-
-                //Generate the account's keys
-                string path = $"{Configuration.RootDirectory}/{Configuration.UserKeyPath}/{account.Slug}.key.pem";
-                var random = EncService.GetSecureRandom();
-                EncService.SavePrivateKey(keyPair, path, random);
             }
             catch (CryptographicException cex)
             {
