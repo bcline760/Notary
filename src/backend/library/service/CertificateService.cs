@@ -36,13 +36,12 @@ namespace Notary.Service
     {
         public CertificateService(
             NotaryConfiguration config,
-            NotaryCaConfiguration caConfig,
             ICertificateRepository repository,
             IRevocatedCertificateRepository revocatedCertificateRepo,
             ILog log) : base(repository, log)
         {
             Configuration = config;
-            CaConfiguration = caConfig;
+            CaConfiguration = config.CertificateAuthority;
             RevocatedCertificateRepository = revocatedCertificateRepo;
         }
 
@@ -239,6 +238,12 @@ namespace Notary.Service
                     SerialNumber = rootCertificate.SerialNumber.ToString(16),
                     Thumbprint = rootThumb
                 };
+                string rootPkPath = $"{CaConfiguration.RootCertificatePath}/{Constants.KeyDirectoryPath}/{rootCertificateData.Thumbprint}.key.pem";
+                
+                SavePrivateKey(rootKeyPair, rootPkPath, randomRoot, Configuration.ApplicationKey);
+                
+                string rootCertPath = $"{CaConfiguration.RootCertificatePath}/{Constants.CertificateDirectoryPath}/{rootCertificateData.Thumbprint}.cer";
+                SaveCertificate(rootCertificate, rootCertPath);
 
                 //Persist the certificate to the data store.
                 await SaveAsync(rootCertificateData, setup.Requestor);
@@ -286,15 +291,13 @@ namespace Notary.Service
 
                 await SaveAsync(signingCertificateData, setup.Requestor);
 
-                string rootPkPath = $"{CaConfiguration.RootCertificatePath}/{Constants.KeyDirectoryPath}/{rootCertificateData.Thumbprint}.key.pem";
-                string signingPkPath = $"{CaConfiguration.RootCertificatePath}/{Constants.KeyDirectoryPath}/{signingCertificateData.Thumbprint}.key.pem";
-                SavePrivateKey(rootKeyPair, rootPkPath, randomRoot, Configuration.ApplicationKey);
+                string signingPkPath = $"{CaConfiguration.SigningCertificatePath}/{Constants.KeyDirectoryPath}/{signingCertificateData.Thumbprint}.key.pem";
                 SavePrivateKey(signingKeyPair, signingPkPath, signingRandom, Configuration.ApplicationKey);
 
-                string rootCertPath = $"{CaConfiguration.SigningCertificatePath}/{Constants.CertificateDirectoryPath}/{rootCertificateData.Thumbprint}.cer";
                 string signingCertificatePath = $"{CaConfiguration.SigningCertificatePath}/{Constants.CertificateDirectoryPath}/{signingCertificateData.Thumbprint}.cer";
-                SaveCertificate(rootCertificate, rootCertPath);
                 SaveCertificate(signingCertificate, signingCertificatePath);
+
+
             }
             catch (Exception cex)
             {

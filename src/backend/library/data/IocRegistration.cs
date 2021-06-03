@@ -47,8 +47,13 @@ namespace Notary.Data
                 var connectionString = config.Database.ConnectionString;
 
                 var settings = MongoClientSettings.FromUrl(MongoUrl.Create(connectionString));
-                var credential = MongoCredential.CreateCredential(config.Database.DatabaseName, config.Database.Username, config.Database.Password);
-                settings.Credential = credential;
+
+                //TODO: This probably needs to be done better.
+                if (!connectionString.Contains("localhost") && !connectionString.Contains("127.0.0.1"))
+                {
+                    var credential = MongoCredential.CreateCredential(config.Database.DatabaseName, config.Database.Username, config.Database.Password);
+                    settings.Credential = credential;
+                }
 
                 IMongoClient client = new MongoClient(settings);
                 IMongoDatabase db = client.GetDatabase(config.Database.DatabaseName);

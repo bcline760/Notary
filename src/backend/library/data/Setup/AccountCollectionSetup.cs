@@ -19,11 +19,11 @@ namespace Notary.Data.Setup
 
         public async Task Setup()
         {
-            var collection = Database.GetCollection<AccountModel>("account");
+            var collection = Database.GetCollection<AccountModel>("accounts");
             if (collection != null)
             {
                 // Drop the collection...this will blow away everything!
-                await Database.DropCollectionAsync("account");
+                await Database.DropCollectionAsync("accounts");
             }
 
             var createOptions = new CreateCollectionOptions<AccountModel>()
@@ -34,8 +34,8 @@ namespace Notary.Data.Setup
                 ValidationAction = DocumentValidationAction.Error,
                 ValidationLevel = DocumentValidationLevel.Strict
             };
-            await Database.CreateCollectionAsync("account", createOptions);
-            collection = Database.GetCollection<AccountModel>("account");
+            await Database.CreateCollectionAsync("accounts", createOptions);
+            collection = Database.GetCollection<AccountModel>("accounts");
 
             var indexKeyBuilder = new IndexKeysDefinitionBuilder<AccountModel>()
                 .Ascending(i => i.Email)

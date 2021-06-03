@@ -19,14 +19,14 @@ namespace Notary.Data.Setup
 
         public async Task Setup()
         {
-            var collection = Database.GetCollection<CertificateModel>("certificate");
+            var collection = Database.GetCollection<CertificateModel>("certificates");
             if (collection != null)
             {
-                await Database.DropCollectionAsync("certificate");
+                await Database.DropCollectionAsync("certificates");
             }
 
-            await Database.CreateCollectionAsync("certificate");
-            collection = Database.GetCollection<CertificateModel>("certificate");
+            await Database.CreateCollectionAsync("certificates");
+            collection = Database.GetCollection<CertificateModel>("certificates");
 
             var indexBuilder = new IndexKeysDefinitionBuilder<CertificateModel>()
                 .Ascending(i => i.Active)

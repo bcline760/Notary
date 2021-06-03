@@ -22,11 +22,11 @@ namespace Notary.Data.Setup
             var collection = Database.GetCollection<RevocatedCertificateModel>("revocated_certificate");
             if (collection != null)
             {
-                await Database.DropCollectionAsync("revocated_certificate");
+                await Database.DropCollectionAsync("revocated_certificates");
             }
 
-            await Database.CreateCollectionAsync("revocated_certificate");
-            collection = Database.GetCollection<RevocatedCertificateModel>("revocated_certificate");
+            await Database.CreateCollectionAsync("revocated_certificates");
+            collection = Database.GetCollection<RevocatedCertificateModel>("revocated_certificates");
 
             var indexBuilder = new IndexKeysDefinitionBuilder<RevocatedCertificateModel>()
                 .Ascending(i => i.Active)

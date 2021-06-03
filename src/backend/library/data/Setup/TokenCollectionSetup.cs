@@ -19,14 +19,14 @@ namespace Notary.Data.Setup
 
         public async Task Setup()
         {
-            var collection = Database.GetCollection<TokenModel>("token");
+            var collection = Database.GetCollection<TokenModel>("tokens");
             if (collection != null)
             {
-                await Database.DropCollectionAsync("token");
+                await Database.DropCollectionAsync("tokens");
             }
 
-            await Database.CreateCollectionAsync("token");
-            collection = Database.GetCollection<TokenModel>("token");
+            await Database.CreateCollectionAsync("tokens");
+            collection = Database.GetCollection<TokenModel>("tokens");
 
             var indexBuilder = new IndexKeysDefinitionBuilder<TokenModel>()
                 .Ascending(i => i.Active)
