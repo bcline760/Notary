@@ -11,10 +11,7 @@ namespace Notary.Contract
         /// </summary>
         public SanKind Kind
         {
-            get => default;
-            set
-            {
-            }
+            get; set;
         }
 
         /// <summary>
@@ -22,10 +19,7 @@ namespace Notary.Contract
         /// </summary>
         public string Name
         {
-            get => default;
-            set
-            {
-            }
+            get;set;
         }
     }
 }
