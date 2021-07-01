@@ -1,0 +1,15 @@
+@import "../../../theme/custom.scss";
+
+a {
+    color: $color-d
+}
+
+a:hover {
+    color: $complementary-light
+}
+
+.menu {
+    background-color: $color-a;
+    color: #FFF;
+    height: 100vh;
+}

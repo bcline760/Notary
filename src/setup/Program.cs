@@ -114,7 +114,7 @@ namespace Notary.Setup
                             Username = "admin"
                         };
 
-                        await service.SaveAsync(newAccount, "setup");
+                        await service.RegisterAccountAsync(newAccount);
                         break;
                     }
                 }

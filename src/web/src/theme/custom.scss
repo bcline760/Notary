@@ -1,0 +1,20 @@
+@import "../../node_modules/bootstrap/scss/functions";
+
+$color-a: #2C3BF6;
+$color-b: #2661D4;
+$primary-color: #36A3EB;
+$color-d: #26BCD4;
+$color-e: #2CF6DB;
+
+$complementary-light: #EBA036;
+$complementary-dark: #9E5F05;
+
+$success-color: #009443;
+$danger-color: #941A0F;
+$warning-color: #947E07;
+
+$body-bg: #FFF;
+$body-color: #000;
+
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";

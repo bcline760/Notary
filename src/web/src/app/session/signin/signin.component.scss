@@ -1,0 +1,13 @@
+@import "../../../theme/custom.scss";
+
+.background {
+    width: 100%;
+    height: 100vh;
+    background: fixed no-repeat center url('../../../assets/login-bg-lg.png');
+    background-size: cover;
+}
+.login-window {
+    padding-top: 5.5em;
+    margin: 0 auto;
+    width: 25em;
+}
